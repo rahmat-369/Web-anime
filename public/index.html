@@ -9,22 +9,28 @@
 </head>
 <body>
 
+    <!-- TOP BAR (lebih tipis + rapi) -->
     <nav class="navbar">
-        <div class="logo">Nime<span class="logo-accent">Stream</span></div>
-        
+        <div class="nav-left">
+            <div class="logo">Nime<span class="logo-accent">Stream</span></div>
+            <div class="tagline">Stream anime, adem di mata.</div>
+        </div>
+
         <div class="nav-right">
             <div class="search-container">
                 <input type="text" id="searchInput" placeholder="Cari anime...">
-                <button onclick="handleSearch()" class="search-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button onclick="handleSearch()" class="search-btn" aria-label="Search">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                 </button>
             </div>
-            
-            <button class="menu-btn" onclick="toggleSidebar()">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+            <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="1"></circle>
                     <circle cx="12" cy="5" r="1"></circle>
                     <circle cx="12" cy="19" r="1"></circle>
@@ -33,55 +39,67 @@
         </div>
     </nav>
 
+    <!-- SIDEBAR (tetap) -->
     <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
     <aside id="sidebar" class="sidebar">
         <div class="sidebar-header">
-            <h3>Dokumentasi</h3>
-            <button onclick="toggleSidebar()" class="close-sidebar">
+            <h3>Menu</h3>
+            <button onclick="toggleSidebar()" class="close-sidebar" aria-label="Close">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
             </button>
         </div>
-        
+
         <div class="sidebar-content">
             <div class="info-section">
-                <h4>Tentang Platform</h4>
-                <p>NimeStream 2026 adalah layanan streaming anime berbasis web yang dikembangkan untuk komunitas pecinta anime. Platform ini menyediakan akses cepat tanpa buffer ke ribuan judul.</p>
+                <h4>Tentang</h4>
+                <p>NimeStream 2026 adalah web streaming anime dengan tampilan yang rapi dan nyaman di mata.</p>
             </div>
 
             <div class="info-section">
-                <h4>Saluran Admin</h4>
-                <p>Ikuti pembaruan resmi langsung dari developer:</p>
+                <h4>Kontak / Channel</h4>
+                <p>Update & info developer:</p>
                 <a href="https://whatsapp.com/channel/0029Vb6ukqnHQbS4mKP0j80L" target="_blank" class="wa-btn">
                     R_hmt ofc (WhatsApp)
                 </a>
             </div>
+
+            <div class="info-section">
+                <h4>Navigasi Cepat</h4>
+                <div class="quick-actions">
+                    <button class="qa-btn" onclick="goHome()">Home</button>
+                    <button class="qa-btn" onclick="document.getElementById('searchInput').focus()">Search</button>
+                    <button class="qa-btn" onclick="toggleSidebar()">Tutup</button>
+                </div>
+            </div>
         </div>
     </aside>
 
-    <main id="app">
+    <!-- APP -->
+    <main id="app" class="app-shell">
         <div id="loading" class="hidden">
             <div class="spinner"></div>
             <p>Memuat Anime...</p>
         </div>
-        
-        <div id="home-view">
-            <!-- Render by app.js -->
-        </div>
 
+        <!-- HOME (render JS) -->
+        <div id="home-view"></div>
+
+        <!-- DETAIL -->
         <div id="detail-view" class="hidden">
             <div class="nav-back">
                 <button onclick="goHome()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
                     </svg>
                     Kembali
                 </button>
             </div>
+
             <div id="anime-info"></div>
-            
+
             <div class="section-header">
                 <div class="bar-accent"></div>
                 <h3>Daftar Episode</h3>
@@ -89,33 +107,48 @@
             <div class="episode-grid" id="episode-grid"></div>
         </div>
 
+        <!-- WATCH -->
         <div id="watch-view" class="hidden">
             <div class="nav-back">
                 <button onclick="backToDetail()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
                     </svg>
                     List Episode
                 </button>
             </div>
-            
+
             <div class="video-wrapper">
                 <iframe id="video-player" src="" allowfullscreen></iframe>
             </div>
-            
+
             <h2 id="video-title" class="video-main-title"></h2>
-            
+
             <div class="server-label">Pilih Server:</div>
             <div class="server-list" id="server-options"></div>
         </div>
     </main>
 
+    <!-- BOTTOM BAR (UX baru, optional tapi rapi) -->
+    <div class="bottom-bar">
+        <button class="bb-btn" onclick="goHome()" aria-label="Home">
+            <span class="bb-ico">⌂</span><span class="bb-txt">Home</span>
+        </button>
+        <button class="bb-btn" onclick="document.getElementById('searchInput').focus()" aria-label="Search">
+            <span class="bb-ico">🔎</span><span class="bb-txt">Cari</span>
+        </button>
+        <button class="bb-btn" onclick="toggleSidebar()" aria-label="Menu">
+            <span class="bb-ico">⋮</span><span class="bb-txt">Menu</span>
+        </button>
+    </div>
+
+    <!-- FOOTER (tetap, tapi branding diganti) -->
     <footer class="site-footer">
         <div class="footer-container">
             <div class="footer-brand-col">
                 <div class="logo footer-logo">Nime<span class="logo-accent">Stream</span></div>
                 <div class="footer-sub">NimeStream | The universe of Anime</div>
-                
+
                 <div class="footer-license">
                     <strong>⚖ R_hmt ofc License</strong>
                     <p>All content (UI elements) on this site are published under the protection of R_hmt ofc.</p>
@@ -123,8 +156,11 @@
 
                 <div class="footer-socials">
                     <a href="https://whatsapp.com/channel/0029Vb6ukqnHQbS4mKP0j80L" target="_blank" aria-label="WhatsApp">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                            </path>
                         </svg>
                     </a>
                 </div>
@@ -148,4 +184,4 @@
 
     <script src="app.js"></script>
 </body>
-          </html>
+                </html> 
