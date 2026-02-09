@@ -394,3 +394,52 @@ h2, h3 { font-size: 1.25rem; font-weight: 700; color: white; }
     .detail-header { flex-direction: column; align-items: center; text-align: center; }
     .sidebar { width: 85%; } 
 }
+/* =====================
+   UI UPGRADE (SAFE OVERRIDE)
+   by R_hmt ofc
+===================== */
+:root {
+  --ui-bg-main: #0b0f17;
+  --ui-bg-card: #121826;
+  --ui-accent: #6d5efc;
+  --ui-text-main: #eaeefc;
+  --ui-text-soft: #9aa4bf;
+  --ui-border-soft: rgba(255,255,255,0.06);
+}
+
+body {
+  background: var(--ui-bg-main);
+}
+
+.anime-card {
+  border-radius: 14px !important;
+  border: 1px solid var(--ui-border-soft);
+  box-shadow: 0 8px 20px rgba(0,0,0,.25);
+}
+
+.anime-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(0,0,0,.35);
+}
+
+.episode {
+  background: linear-gradient(135deg, #ff3d6a, #ff6a3d) !important;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+input[type="search"] {
+  border-radius: 10px;
+  border-color: var(--ui-border-soft);
+}
+
+input[type="search"]:focus {
+  border-color: var(--ui-accent);
+  box-shadow: 0 0 0 2px rgba(109,94,252,.25);
+}
+
+footer {
+  border-top: 1px solid var(--ui-border-soft);
+                             }
+
