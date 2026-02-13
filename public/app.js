@@ -1,173 +1,146 @@
 const API_BASE = '/api';
 
-// --- KONFIGURASI MENU BERANDA (ORBIT STYLE) ---
-const SECTIONS_CONFIG = [
-    {
-        title: "LayarOtaku Update",
-        type: "latest", // Mengambil data endpoint /latest
-        badge: "Ongoing",
-        color: "pink"
-    },
-    {
-        title: "Nimegami Update",
-        type: "query",
-        queries: ["isekai", "magic", "fantasy"],
-        badge: "Anime & Movie",
-        color: "blue"
-    },
-    {
-        title: "Donghua Terbaru",
-        type: "query",
-        queries: ["donghua", "throne", "soul", "martial"],
-        badge: "Anichin",
-        color: "pink"
-    },
-    {
-        title: "Romance & School",
-        type: "query",
-        queries: ["romance", "school", "love"],
-        badge: "Bucin",
-        color: "blue"
-    }
+// --- CONFIG ---
+const HOME_SECTIONS = [
+    { title: "LayarOtaku Update", type: "latest", badge: "Ongoing", color: "pink" },
+    { title: "Trending Action", type: "query", queries: ["jujutsu", "solo leveling", "kaiju", "wind breaker"], badge: "Hot", color: "blue" },
+    { title: "Donghua Server", type: "query", queries: ["donghua", "btth", "soul land", "swallowed"], badge: "Anichin", color: "pink" },
+    { title: "Romance Picks", type: "query", queries: ["romance", "harem", "school", "roshidere"], badge: "Love", color: "blue" }
 ];
 
-// UTILITY
+// UTILS
 const getEl = (id) => document.getElementById(id);
-const showEl = (id) => getEl(id).classList.remove('hidden');
-const hideEl = (id) => getEl(id).classList.add('hidden');
+const showEl = (id) => getEl(id)?.classList.remove('hidden');
+const hideEl = (id) => getEl(id)?.classList.add('hidden');
 const loader = (active) => active ? showEl('loading') : hideEl('loading');
 
-// --- NAVIGATION & VIEWS ---
+// GLOBAL STATE
+let currentAnimeEpisodes = []; 
+let currentWatchContext = {};  
+let watchTimer = null;         
+let trackedSeconds = 0;        
+
+// --- NAVIGATION ---
 function switchView(viewId) {
     ['home-view', 'detail-view', 'watch-view', 'list-view', 'profile-view'].forEach(id => hideEl(id));
     showEl(viewId);
     
-    // Update Bottom Nav Active State
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     
     if (viewId === 'home-view') getEl('nav-home').classList.add('active');
     if (viewId === 'list-view') getEl('nav-list').classList.add('active');
     if (viewId === 'profile-view') getEl('nav-profile').classList.add('active');
-    // History tab shares Home View logic but filters visibility, handled separately
-    if (viewId === 'history-view') getEl('nav-history').classList.add('active');
+    
+    if (viewId !== 'watch-view') stopWatchTimer();
 }
 
 function goHome() {
     switchView('home-view');
     loadHomeData();
+    checkResumePopup();
 }
 
-function goList() {
-    switchView('list-view');
-}
+function goList() { switchView('list-view'); }
+function goProfile() { switchView('profile-view'); }
 
-function showProfile() {
-    switchView('profile-view');
-}
+// --- HELPER: EPISODE NUMBER EXTRACTOR (FIXED) ---
+function extractEpNumber(title) {
+    if (!title) return '?';
+    // Coba cari pola "Episode 12"
+    let match = title.match(/Episode\s+(\d+)/i);
+    if (match) return match[1];
+    
+    // Coba cari pola angka saja di akhir string
+    match = title.match(/(\d+)$/);
+    if (match) return match[1];
 
-function showHistoryPage() {
-    // Reuse home view but could filter or just scroll to history
-    // For this UI, we will just show the home view where History is at the top
-    switchView('home-view');
-    getEl('nav-home').classList.remove('active');
-    getEl('nav-history').classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Coba cari angka di mana saja
+    match = title.match(/(\d+)/);
+    return match ? match[1] : title; // Fallback ke title asli jika gagal
 }
 
 // --- SEARCH ---
 function toggleSearch() {
     const overlay = getEl('search-overlay');
-    if (overlay.classList.contains('hidden')) {
-        showEl('search-overlay');
-        getEl('searchInput').focus();
-    } else {
-        hideEl('search-overlay');
-    }
+    overlay.classList.toggle('hidden');
+    if (!overlay.classList.contains('hidden')) getEl('searchInput').focus();
 }
 
-async function handleSearch(manualQuery = null) {
+async function handleSearch(manualQuery = null, isListTab = false) {
     const query = manualQuery || getEl('searchInput').value;
     if (!query) return;
 
-    toggleSearch(); // Close overlay
+    if(!getEl('search-overlay').classList.contains('hidden')) toggleSearch();
     loader(true);
-    switchView('home-view'); // Use home container for results
+
+    const targetView = isListTab ? 'list-view' : 'home-view';
+    const containerId = isListTab ? 'list-results' : 'home-content';
     
-    const container = getEl('home-content');
-    container.innerHTML = `<div class="section-title"><div class="bar-accent blue"></div><h3>Hasil: ${query}</h3></div>`;
+    switchView(targetView);
+    const container = getEl(containerId);
+    
+    container.innerHTML = `<div class="section-title"><div class="bar-accent blue"></div><h3>Hasil: "${query}"</h3></div>`;
 
     try {
         const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
         const data = await res.json();
         
         const grid = document.createElement('div');
-        grid.className = 'episode-grid'; // Reuse grid style but for posters
+        grid.className = 'episode-grid';
         grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
         
-        grid.innerHTML = data.map(anime => `
-            <div class="anime-card" onclick="loadDetail('${anime.url}')" style="min-width:auto; max-width:none">
-                <img src="${anime.image}" class="card-img">
-                <div class="badge-ep">${anime.score || '?'}</div>
-                <div class="card-overlay">
-                    <div class="card-title">${anime.title}</div>
+        if (!data || data.length === 0) {
+            container.innerHTML += '<p style="text-align:center; color:#888;">Tidak ditemukan.</p>';
+        } else {
+            grid.innerHTML = data.map(anime => `
+                <div class="anime-card" onclick="loadDetail('${anime.url}')" style="min-width:auto; max-width:none">
+                    <img src="${anime.image}" class="card-img">
+                    <div class="badge-ep">${anime.score || 'Ep ?'}</div>
+                    <div class="card-overlay">
+                        <div class="card-title">${anime.title}</div>
+                    </div>
                 </div>
-            </div>
-        `).join('');
-        
-        container.appendChild(grid);
+            `).join('');
+            container.appendChild(grid);
+        }
     } catch (e) {
         console.error(e);
-        container.innerHTML += `<p style="text-align:center; margin-top:20px">Gagal mencari.</p>`;
+        container.innerHTML += '<p style="text-align:center; color:red;">Gagal memuat.</p>';
     } finally {
         loader(false);
     }
 }
 
-// --- HOME LOGIC ---
+// --- HOME DATA ---
 async function loadHomeData() {
-    // Render History from LocalStorage
     renderHistorySection();
-
     const container = getEl('home-content');
-    if (container.childElementCount > 0) return; // Don't reload if already loaded
+    if (container.childElementCount > 0) return;
 
     loader(true);
     try {
-        for (const section of SECTIONS_CONFIG) {
+        for (const section of HOME_SECTIONS) {
             let data = [];
-            
             if (section.type === 'latest') {
                 const res = await fetch(`${API_BASE}/latest`);
                 data = await res.json();
             } else {
-                // Multi query merge
-                const promises = section.queries.map(q => 
-                    fetch(`${API_BASE}/search?q=${encodeURIComponent(q)}`).then(r => r.json()).catch(() => [])
-                );
+                const promises = section.queries.map(q => fetch(`${API_BASE}/search?q=${encodeURIComponent(q)}`).then(r=>r.json()).catch(()=>[]));
                 const results = await Promise.all(promises);
                 results.forEach(arr => { if(Array.isArray(arr)) data = [...data, ...arr]; });
-                
-                // Remove duplicates by URL
                 data = [...new Map(data.map(item => [item.url, item])).values()];
             }
 
-            if (data && data.length > 0) {
-                renderSection(section, data.slice(0, 10)); // Limit 10 items per section
-            }
+            if (data.length > 0) renderSection(section, data.slice(0, 10));
         }
-    } catch (e) {
-        console.error(e);
-    } finally {
-        loader(false);
-    }
+    } catch (e) { console.error(e); } 
+    finally { loader(false); }
 }
 
 function renderSection(config, list) {
     const container = getEl('home-content');
-    
-    const sectionHtml = document.createElement('div');
-    sectionHtml.className = 'category-section';
-    sectionHtml.innerHTML = `
+    const div = document.createElement('div');
+    div.innerHTML = `
         <div class="section-title">
             <div class="bar-accent ${config.color}"></div>
             <h3>${config.title}</h3>
@@ -176,8 +149,7 @@ function renderSection(config, list) {
         <div class="horizontal-scroll">
             ${list.map(anime => `
                 <div class="anime-card" onclick="loadDetail('${anime.url}')">
-                    <span class="badge-type">${config.badge === 'Ongoing' ? 'ON' : 'Anime'}</span>
-                    <span class="badge-ep">${anime.episode || anime.score || '?'}</span>
+                    <span class="badge-ep">${anime.episode || '?'}</span>
                     <img src="${anime.image}" class="card-img" loading="lazy">
                     <div class="card-overlay">
                         <div class="card-title">${anime.title}</div>
@@ -186,131 +158,108 @@ function renderSection(config, list) {
             `).join('')}
         </div>
     `;
-    
-    container.appendChild(sectionHtml);
+    container.appendChild(div);
 }
 
-// --- HISTORY LOGIC (LOCALSTORAGE) ---
-function saveHistory(anime) {
-    let history = JSON.parse(localStorage.getItem('watchHistory')) || [];
-    // Remove if exists
-    history = history.filter(item => item.url !== anime.url);
-    // Add to top
-    history.unshift(anime);
-    // Limit to 5
-    if (history.length > 5) history.pop();
-    localStorage.setItem('watchHistory', JSON.stringify(history));
-}
+// --- DETAIL & WATCH LOGIC (CORE FIX) ---
 
-function renderHistorySection() {
-    const history = JSON.parse(localStorage.getItem('watchHistory')) || [];
-    const section = getEl('history-section');
-    const listDiv = getEl('history-list');
-    
-    if (history.length === 0) {
-        section.classList.add('hidden');
-        return;
+// Mode: 'view' (pindah halaman) atau 'data' (cuma ambil data utk playlist)
+async function loadDetail(url, mode = 'view') {
+    if (mode === 'view') {
+        loader(true);
+        switchView('detail-view');
     }
-    
-    section.classList.remove('hidden');
-    listDiv.innerHTML = history.map(anime => `
-        <div class="anime-card" onclick="loadVideo('${anime.videoUrl}', '${anime.title}', '${anime.url}', '${anime.image}')">
-             <span class="badge-type" style="background:var(--accent); border:none; color:white">Lanjut Ep ${anime.epName}</span>
-            <img src="${anime.image}" class="card-img">
-            <div class="card-overlay">
-                <div class="card-title">${anime.title}</div>
-            </div>
-        </div>
-    `).join('');
-}
-
-// --- DETAIL ---
-let currentAnimeDetail = {}; // Store temp for history
-
-async function loadDetail(url) {
-    loader(true);
-    switchView('detail-view');
     
     try {
         const res = await fetch(`${API_BASE}/detail?url=${encodeURIComponent(url)}`);
         const data = await res.json();
         
-        currentAnimeDetail = {
+        currentAnimeEpisodes = data.episodes;
+        currentWatchContext = {
             title: data.title,
             image: data.image,
-            url: url // Main anime url
+            mainUrl: url
         };
 
-        const infoDiv = getEl('anime-info');
-        infoDiv.innerHTML = `
-            <div class="detail-hero">
-                <img src="${data.image}" class="detail-poster">
-                <div class="detail-meta">
-                    <h1>${data.title}</h1>
-                    <div class="tags">${data.info.genre || 'Anime'}</div>
+        if (mode === 'view') {
+            getEl('anime-info').innerHTML = `
+                <div class="detail-hero">
+                    <img src="${data.image}" class="detail-poster">
+                    <h2>${data.title}</h2>
+                    <div style="font-size:0.8rem; color:var(--primary); margin-bottom:10px">${data.info.genre || 'Anime'}</div>
                     <p class="desc">${data.description}</p>
                 </div>
-            </div>
-        `;
+            `;
+            
+            getEl('episode-grid').innerHTML = data.episodes.map(ep => {
+                const epNum = extractEpNumber(ep.title);
+                return `<div class="ep-btn" onclick="startWatchSession('${ep.url}', '${epNum}')">${epNum}</div>`
+            }).join('');
+        }
+        
+        return true; // Success signal
 
-        const epGrid = getEl('episode-grid');
-        epGrid.innerHTML = data.episodes.map(ep => {
-            // Clean Episode Title
-            let shortTitle = ep.title.replace(/Episode/i, '').trim();
-            return `<div class="ep-btn" onclick="loadVideo('${ep.url}', '${data.title}', '${url}', '${data.image}', '${shortTitle}')">${shortTitle}</div>`
-        }).join('');
-
-    } catch (e) {
+    } catch (e) { 
         console.error(e);
-    } finally {
-        loader(false);
+        if(mode === 'view') alert("Gagal memuat detail anime.");
+        return false;
+    } 
+    finally { 
+        if (mode === 'view') loader(false); 
     }
 }
 
 function backToDetail() {
-    // If we have history of what was clicked, we go back, otherwise home
-    if(currentAnimeDetail.url) {
-        loadDetail(currentAnimeDetail.url);
+    if (currentWatchContext.mainUrl) {
+        loadDetail(currentWatchContext.mainUrl, 'view');
     } else {
         goHome();
     }
 }
 
-// --- WATCH ---
-async function loadVideo(url, title, mainUrl, image, epName = '?') {
+// --- PLAYER ---
+function startWatchSession(epUrl, epNum, startTime = 0) {
+    trackedSeconds = startTime;
+    loadVideo(epUrl, epNum);
+}
+
+async function loadVideo(epUrl, epNum) {
     loader(true);
     switchView('watch-view');
-    getEl('video-title').innerText = title + ' - Ep ' + epName;
+    
+    getEl('video-title').innerText = `${currentWatchContext.title || 'Anime'} - Ep ${epNum}`;
+    getEl('current-ep-badge').innerText = `Ep ${epNum}`;
 
-    // Save to History
-    saveHistory({
-        title: title,
-        url: mainUrl, // Link ke halaman detail
-        videoUrl: url, // Link ke episode ini
-        image: image,
-        epName: epName
-    });
+    // Pastikan playlist ada. Jika kosong (misal refresh), coba load ulang dari context
+    if (currentAnimeEpisodes.length === 0 && currentWatchContext.mainUrl) {
+        await loadDetail(currentWatchContext.mainUrl, 'data');
+    }
+    renderWatchPlaylist(epNum);
+    
+    startWatchTimer(epUrl, epNum);
 
     try {
-        const res = await fetch(`${API_BASE}/watch?url=${encodeURIComponent(url)}`);
+        const res = await fetch(`${API_BASE}/watch?url=${encodeURIComponent(epUrl)}`);
         const data = await res.json();
-
+        
         const player = getEl('video-player');
-        const serverContainer = getEl('server-options');
+        
+        // Filter Server "Mega" (Case Insensitive)
+        const validStreams = data.streams.filter(s => 
+            !s.server.toLowerCase().includes('mega')
+        );
 
-        if (data.streams.length > 0) {
-            player.src = data.streams[0].url;
-            serverContainer.innerHTML = data.streams.map((s, i) => `
-                <button class="server-btn ${i === 0 ? 'active' : ''}" onclick="changeServer('${s.url}', this)">${s.server}</button>
+        if (validStreams.length > 0) {
+            player.src = validStreams[0].url;
+            getEl('server-options').innerHTML = validStreams.map((s, i) => `
+                <button class="server-btn ${i === 0 ? 'active' : ''}" 
+                    onclick="changeServer('${s.url}', this)">${s.server}</button>
             `).join('');
         } else {
-            alert("Video tidak ditemukan.");
+            alert("Maaf, stream tidak tersedia (Mungkin broken link).");
         }
-    } catch (e) {
-        console.error(e);
-    } finally {
-        loader(false);
-    }
+    } catch (e) { console.error(e); } 
+    finally { loader(false); }
 }
 
 function changeServer(url, btn) {
@@ -319,11 +268,134 @@ function changeServer(url, btn) {
     btn.classList.add('active');
 }
 
-// INIT
-document.addEventListener('DOMContentLoaded', () => {
-    loadHomeData();
+function renderWatchPlaylist(currentEpNum) {
+    const container = getEl('watch-episode-list');
+    container.innerHTML = currentAnimeEpisodes.map(ep => {
+        const num = extractEpNumber(ep.title);
+        const isActive = (num == currentEpNum) ? 'active' : ''; // Loose comparison for string/number
+        return `<div class="ep-btn ${isActive}" onclick="startWatchSession('${ep.url}', '${num}')">${num}</div>`;
+    }).join('');
+}
+
+// --- HISTORY & TIME TRACKING ---
+function startWatchTimer(epUrl, epNum) {
+    stopWatchTimer();
     
-    // Search Enter Key
+    // Save awal
+    saveToHistory(epUrl, epNum, trackedSeconds);
+
+    watchTimer = setInterval(() => {
+        trackedSeconds += 10; // Simulasi +10 detik
+        saveToHistory(epUrl, epNum, trackedSeconds);
+    }, 10000); 
+}
+
+function stopWatchTimer() {
+    if (watchTimer) clearInterval(watchTimer);
+}
+
+function formatTime(seconds) {
+    if(!seconds) return "0:00";
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? '0'+s : s}`;
+}
+
+function saveToHistory(epUrl, epNum, seconds) {
+    if (!currentWatchContext.title) return; // Jangan save jika data belum siap
+
+    let history = JSON.parse(localStorage.getItem('watchHistory')) || [];
+    
+    // Hapus duplikat anime yang sama
+    history = history.filter(h => h.mainUrl !== currentWatchContext.mainUrl);
+    
+    history.unshift({
+        title: currentWatchContext.title,
+        image: currentWatchContext.image,
+        mainUrl: currentWatchContext.mainUrl,
+        epUrl: epUrl,
+        epNum: epNum, // Pastikan ini string angka yg valid
+        seconds: seconds,
+        date: new Date().getTime()
+    });
+
+    if (history.length > 6) history.pop();
+    localStorage.setItem('watchHistory', JSON.stringify(history));
+}
+
+function renderHistorySection() {
+    const history = JSON.parse(localStorage.getItem('watchHistory')) || [];
+    const container = getEl('history-list');
+    const section = getEl('history-section');
+
+    if (history.length === 0) {
+        section.classList.add('hidden');
+        return;
+    }
+
+    section.classList.remove('hidden');
+    container.innerHTML = history.map(h => `
+        <div class="anime-card" onclick="resumeVideo('${h.epUrl}', '${h.epNum}', '${h.mainUrl}', '${h.title}', '${h.image}', ${h.seconds})">
+            <span class="badge-ep" style="background:#e056fd; font-size:0.75rem;">Lanjut Ep ${h.epNum || '?'}</span>
+            <img src="${h.image}" class="card-img">
+            <div class="card-overlay">
+                <div class="card-title">${h.title}</div>
+                <small class="history-progress">🕒 ${formatTime(h.seconds)}</small>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function resumeVideo(epUrl, epNum, mainUrl, title, image, seconds) {
+    // Restore context manual karena load dari localStorage
+    currentWatchContext = { title, image, mainUrl };
+    
+    loader(true);
+    // Load detail secara diam-diam ('data' mode) untuk populate playlist
+    const success = await loadDetail(mainUrl, 'data');
+    if(success) {
+        startWatchSession(epUrl, epNum, seconds);
+    } else {
+        loader(false);
+    }
+}
+
+// --- POPUP RESUME ---
+function checkResumePopup() {
+    const history = JSON.parse(localStorage.getItem('watchHistory')) || [];
+    if (history.length > 0) {
+        const last = history[0];
+        // 24 jam terakhir
+        if ((new Date().getTime() - last.date) < 86400000) {
+            getEl('resume-text').innerText = `Lanjut ${last.title} Ep ${last.epNum}?`;
+            getEl('resume-toast').dataset.resumeData = JSON.stringify(last);
+            
+            const toast = getEl('resume-toast');
+            toast.classList.remove('hidden');
+            
+            // Auto hide dalam 8 detik
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 8000);
+        }
+    }
+}
+
+function confirmResume() {
+    const raw = getEl('resume-toast').dataset.resumeData;
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    closeResume();
+    resumeVideo(data.epUrl, data.epNum, data.mainUrl, data.title, data.image, data.seconds);
+}
+
+function closeResume() {
+    getEl('resume-toast').classList.add('hidden');
+}
+
+// --- INIT ---
+document.addEventListener('DOMContentLoaded', () => {
+    goHome();
     getEl('searchInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleSearch();
     });
