@@ -2,109 +2,153 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OrbitCloud • Realtime Engine</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WatchNime • R_hmt ofc</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="nav-left">
-            <div class="brand-wrapper">
-                <div class="orbit-logo">
-                    <svg viewBox="0 0 100 100" width="32" height="32">
-                        <circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="2" opacity="0.2"/>
-                        <path d="M20 50 Q50 10 80 50 Q50 90 20 50" fill="#29b6f6" />
-                        <circle cx="50" cy="50" r="10" fill="white" />
-                    </svg>
-                </div>
-                <div class="brand-text">
-                    <div class="logo-main">OrbitCloud</div>
-                    <div class="logo-sub">REALTIME ENGINE</div>
-                </div>
-            </div>
+    <header class="top-header">
+        <div class="brand-container">
+            <div class="logo-text">WatchNime</div>
+            <div class="logo-sub">R_hmt ofc</div>
         </div>
-
-        <div class="nav-right">
-            <div class="user-avatar">
-                <img src="https://i.pravatar.cc/100?img=12" alt="Profile">
-            </div>
+        <div class="user-avatar" onclick="showProfile()">
+            <img src="https://ui-avatars.com/api/?name=R_hmt&background=0D8ABC&color=fff&rounded=true" alt="User">
         </div>
-    </nav>
+    </header>
 
-    <main id="app" class="app-shell">
+    <div id="search-overlay" class="search-overlay hidden">
+        <div class="search-box-container">
+            <input type="text" id="searchInput" placeholder="Cari anime (cth: Naruto)...">
+            <button onclick="handleSearch()" class="search-confirm-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+            <button onclick="toggleSearch()" class="close-search">✕</button>
+        </div>
+        <div id="search-results-preview"></div>
+    </div>
+
+    <main id="app" class="app-content">
+        
         <div id="loading" class="hidden">
             <div class="orbit-spinner"></div>
-            <p>Initializing Engine...</p>
         </div>
 
-        <div id="home-view"></div>
+        <div id="home-view">
+            <div id="history-section" class="hidden">
+                <div class="section-title">
+                    <div class="bar-accent pink"></div>
+                    <h3>Lanjutkan Menonton</h3>
+                    <a href="#" onclick="showHistoryPage()" class="see-all">Lihat Semua</a>
+                </div>
+                <div id="history-list" class="horizontal-scroll large-cards">
+                    </div>
+            </div>
+
+            <div id="home-content"></div>
+        </div>
 
         <div id="detail-view" class="hidden">
             <div class="nav-back">
                 <button onclick="goHome()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                    Kembali
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                 </button>
+                <span>Detail Anime</span>
             </div>
             <div id="anime-info"></div>
-            <div class="section-header-wrap">
-                <div class="accent-bar"></div>
-                <h3>Daftar Episode</h3>
+            
+            <div class="section-divider">
+                <h3>Episode</h3>
+                <span class="badge-soft">List</span>
             </div>
             <div class="episode-grid" id="episode-grid"></div>
         </div>
 
         <div id="watch-view" class="hidden">
-            <div class="nav-back">
+             <div class="nav-back">
                 <button onclick="backToDetail()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                    List Episode
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                 </button>
+                <span>Streaming</span>
             </div>
+
             <div class="video-container">
                 <iframe id="video-player" src="" allowfullscreen></iframe>
             </div>
-            <h2 id="video-title" class="video-main-title"></h2>
-            <div class="server-label">Select Server:</div>
-            <div class="server-list" id="server-options"></div>
+
+            <div class="watch-info">
+                <h2 id="video-title">Loading...</h2>
+                <div class="server-label">Pilih Server:</div>
+                <div class="server-list" id="server-options"></div>
+            </div>
         </div>
+
+        <div id="list-view" class="hidden">
+             <div class="section-title">
+                <div class="bar-accent blue"></div>
+                <h3>Daftar Genre</h3>
+            </div>
+            <div class="genre-grid">
+                <button onclick="handleSearch('Isekai')">🌀 Isekai</button>
+                <button onclick="handleSearch('Action')">⚔️ Action</button>
+                <button onclick="handleSearch('Romance')">❤️ Romance</button>
+                <button onclick="handleSearch('Fantasy')">✨ Fantasy</button>
+                <button onclick="handleSearch('Drama')">🎭 Drama</button>
+                <button onclick="handleSearch('Comedy')">😂 Comedy</button>
+                <button onclick="handleSearch('Slice of Life')">🍃 Slice of Life</button>
+                <button onclick="handleSearch('Horror')">👻 Horror</button>
+            </div>
+        </div>
+
+        <div id="profile-view" class="hidden">
+            <div class="profile-card">
+                <img src="https://ui-avatars.com/api/?name=R_hmt&background=0D8ABC&color=fff&rounded=true" class="big-avatar">
+                <h2>R_hmt ofc</h2>
+                <p>Developer & Admin</p>
+                <div class="profile-stats">
+                    <div class="stat"><span>User</span><strong>Guest</strong></div>
+                    <div class="stat"><span>Status</span><strong>Active</strong></div>
+                </div>
+                <div class="profile-actions">
+                     <a href="https://whatsapp.com/channel/0029Vb6ukqnHQbS4mKP0j80L" target="_blank" class="wa-btn">
+                        Join WhatsApp Channel
+                    </a>
+                </div>
+                <div class="info-text">
+                    <p>Web ini dibuat menggunakan referensi style OrbitCloud. Semua konten didapatkan dari sumber pihak ketiga.</p>
+                </div>
+            </div>
+        </div>
+
     </main>
 
-    <div id="search-overlay" class="search-modal hidden">
-        <div class="search-modal-content">
-            <input type="text" id="searchInput" placeholder="Cari anime favoritmu...">
-            <button onclick="handleSearch()" class="search-action-btn">Cari</button>
-            <button onclick="toggleSearch()" class="close-search">Batal</button>
-        </div>
-    </div>
-
-    <div class="bottom-nav">
-        <button class="nav-item active" onclick="goHome()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="goHome()" id="nav-home">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
             <span>Home</span>
-        </button>
-        <button class="nav-item" onclick="handleSearch('ongoing')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </div>
+        <div class="nav-item" onclick="goList()" id="nav-list">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg>
             <span>List</span>
-        </button>
+        </div>
         
-        <div class="search-fab-container">
-            <button class="search-fab" onclick="toggleSearch()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <div class="nav-item-center">
+            <button class="center-fab" onclick="toggleSearch()">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             </button>
         </div>
 
-        <button class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <div class="nav-item" onclick="showHistoryPage()" id="nav-history">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             <span>History</span>
-        </button>
-        <button class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="nav-item" onclick="showProfile()" id="nav-profile">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             <span>Profile</span>
-        </button>
-    </div>
+        </div>
+    </nav>
 
     <script src="app.js"></script>
 </body>
