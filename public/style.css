@@ -1,373 +1,624 @@
-:root{
-    --bg-main:#070a14;
-    --bg-card:#0d1226;
-    --bg-card-soft:#101737;
-    --text-main:#eaf0ff;
-    --text-soft:rgba(255,255,255,.65);
-    --line:rgba(255,255,255,.08);
-
-    --pink:#ff4fb2;
-    --orange:#ff8a3d;
-    --cyan:#22d3ee;
-    --purple:#a855f7;
+/* ================================
+   GLOBAL RESET
+================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Outfit', sans-serif;
+body {
+  background: #070812;
+  color: #ffffff;
+  padding-bottom: 90px;
+  overflow-x: hidden;
 }
 
-body{
-    background: radial-gradient(900px 600px at 20% 10%, rgba(99,102,241,.20), transparent 55%),
-                radial-gradient(900px 600px at 90% 30%, rgba(236,72,153,.14), transparent 60%),
-                radial-gradient(900px 600px at 30% 100%, rgba(34,211,238,.10), transparent 60%),
-                var(--bg-main);
-    color: var(--text-main);
-    padding-bottom:90px;
+a {
+  text-decoration: none;
+  color: inherit;
 }
 
-/* HEADER */
-.orbit-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:16px 18px;
-    position:sticky;
-    top:0;
-    z-index:10;
-    background: linear-gradient(to bottom, rgba(7,10,20,.92), rgba(7,10,20,.25));
-    backdrop-filter: blur(10px);
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: none;
 }
 
-.orbit-brand{
-    display:flex;
-    align-items:center;
-    gap:12px;
+img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.orbit-logo{
-    width:44px;
-    height:44px;
-    border-radius:14px;
-    background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
-    border:1px solid rgba(255,255,255,.10);
-    position:relative;
-    overflow:hidden;
+/* ================================
+   HEADER (TOP)
+================================ */
+.top-header {
+  width: 100%;
+  padding: 18px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #060614;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.orbit-cloud{
-    position:absolute;
-    left:10px;
-    top:16px;
-    width:22px;
-    height:14px;
-    border-radius:999px;
-    background:rgba(255,255,255,.85);
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.orbit-cloud::before,
-.orbit-cloud::after{
-    content:"";
-    position:absolute;
-    background:rgba(255,255,255,.85);
-    border-radius:999px;
+.brand-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #1a1a30, #0a0a16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.orbit-cloud::before{
-    width:10px;
-    height:10px;
-    left:-4px;
-    top:-5px;
+.logo-circle {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff00ff, #00ffff);
+  box-shadow: 0px 0px 12px rgba(255, 0, 255, 0.5);
 }
 
-.orbit-cloud::after{
-    width:12px;
-    height:12px;
-    right:-5px;
-    top:-7px;
+.brand-text {
+  display: flex;
+  flex-direction: column;
 }
 
-.orbit-dot{
-    position:absolute;
-    right:10px;
-    bottom:10px;
-    width:8px;
-    height:8px;
-    border-radius:50%;
-    background:var(--cyan);
-    box-shadow:0 0 0 5px rgba(34,211,238,.18);
+.brand-title {
+  font-size: 18px;
+  font-weight: 700;
 }
 
-.orbit-title h1{
-    font-size:18px;
-    font-weight:700;
-    margin-bottom:3px;
+.brand-sub {
+  font-size: 12px;
+  opacity: 0.7;
 }
 
-.orbit-title p{
-    font-size:10px;
-    letter-spacing:2px;
-    color:rgba(255,255,255,.55);
+.profile-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  background: #111127;
 }
 
-.orbit-profile img{
-    width:44px;
-    height:44px;
-    border-radius:50%;
-    border:1px solid rgba(255,255,255,.18);
-    object-fit:cover;
-    box-shadow:0 10px 22px rgba(0,0,0,.5);
+/* ================================
+   MAIN CONTAINER
+================================ */
+.container {
+  width: 100%;
+  padding: 18px;
 }
 
-/* MAIN */
-.orbit-main{
-    padding:12px 16px 0 16px;
+.page {
+  display: none;
 }
 
-/* SEARCH BOX */
-.orbit-searchbox{
-    margin: 8px 0 18px 0;
+.page.active {
+  display: block;
 }
 
-.orbit-searchbox input{
-    width:100%;
-    padding:12px 14px;
-    border-radius:18px;
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.10);
-    outline:none;
-    color:white;
-    font-size:14px;
+.page-title {
+  margin-bottom: 15px;
 }
 
-/* SECTION */
-.orbit-section{
-    margin-bottom:22px;
+.page-title h2 {
+  font-size: 18px;
+  font-weight: 700;
 }
 
-.orbit-section-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:14px;
-    gap:12px;
+/* ================================
+   SECTION HEADER
+================================ */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 22px;
+  margin-bottom: 14px;
 }
 
-.orbit-section-title{
-    display:flex;
-    align-items:center;
-    gap:10px;
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.orbit-section-title h2{
-    font-size:18px;
-    font-weight:600;
+.section-title h2 {
+  font-size: 16px;
+  font-weight: 700;
 }
 
-.orbit-line{
-    width:4px;
-    height:22px;
-    border-radius:999px;
-    background:var(--pink);
+.section-line {
+  width: 4px;
+  height: 18px;
+  border-radius: 99px;
 }
 
-.orbit-section-title.orange .orbit-line{background:var(--orange);}
-.orbit-section-title.cyan .orbit-line{background:var(--cyan);}
-.orbit-section-title.purple .orbit-line{background:var(--purple);}
-
-.orbit-btn{
-    padding:7px 14px;
-    border-radius:14px;
-    border:1px solid rgba(255,255,255,.12);
-    background:rgba(255,255,255,.06);
-    color:rgba(255,255,255,.86);
-    font-size:12px;
-    cursor:pointer;
+.section-line.pink {
+  background: #ff00ff;
 }
 
-.orbit-btn:hover{
-    background:rgba(255,255,255,.10);
+.section-line.orange {
+  background: #ff8800;
 }
 
-/* PILLS */
-.orbit-pill{
-    padding:7px 14px;
-    border-radius:999px;
-    font-size:12px;
-    border:1px solid rgba(255,255,255,.12);
-    background:rgba(255,255,255,.06);
-    color:rgba(255,255,255,.86);
-    white-space:nowrap;
+.section-line.green {
+  background: #00ff88;
 }
 
-.orbit-pill.orange{
-    border-color:rgba(255,138,61,.35);
-    background:rgba(255,138,61,.12);
+.section-line.purple {
+  background: #9a4dff;
 }
 
-.orbit-pill.cyan{
-    border-color:rgba(34,211,238,.35);
-    background:rgba(34,211,238,.12);
+.see-all-btn {
+  padding: 7px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  background: rgba(255, 0, 255, 0.12);
+  color: #ff7bff;
+  font-weight: 600;
+  transition: 0.2s;
 }
 
-.orbit-pill.purple{
-    border-color:rgba(168,85,247,.35);
-    background:rgba(168,85,247,.12);
+.see-all-btn:hover {
+  background: rgba(255, 0, 255, 0.22);
 }
 
-/* GRID */
-.orbit-grid-continue{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:14px;
+/* ================================
+   BADGES
+================================ */
+.badge {
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  background: rgba(255, 136, 0, 0.15);
+  color: #ffb15c;
 }
 
-.orbit-grid-3{
-    display:grid;
-    grid-template-columns:repeat(3, 1fr);
-    gap:14px;
+.badge.teal {
+  background: rgba(0, 255, 200, 0.12);
+  color: #6effdf;
 }
 
-/* CARD */
-.orbit-card{
-    position:relative;
-    border-radius:20px;
-    overflow:hidden;
-    border:1px solid rgba(255,255,255,.10);
-    background:linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-    box-shadow:0 14px 40px rgba(0,0,0,.55);
-    cursor:pointer;
-    min-height:150px;
+.badge.purple {
+  background: rgba(154, 77, 255, 0.15);
+  color: #cba8ff;
 }
 
-.orbit-card img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    display:block;
+/* ================================
+   GRID TWO (Continue Watching)
+================================ */
+.grid-two {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
 }
 
-.orbit-card::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    background: linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,.15) 55%, rgba(0,0,0,0));
+.big-card {
+  width: 100%;
+  height: 110px;
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+  background: #111127;
+  box-shadow: 0px 0px 25px rgba(0, 0, 0, 0.4);
 }
 
-.orbit-card .orbit-info{
-    position:absolute;
-    bottom:0;
-    left:0;
-    right:0;
-    padding:12px 12px 10px 12px;
-    z-index:2;
+.big-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.7);
 }
 
-.orbit-card .orbit-title{
-    font-size:13px;
-    font-weight:600;
-    line-height:1.2;
-    max-height:2.4em;
-    overflow:hidden;
-    display:-webkit-box;
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
+.big-card .card-info {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
 }
 
-.orbit-card .orbit-ep{
-    margin-top:7px;
-    font-size:12px;
-    font-weight:600;
-    color:var(--pink);
+.big-card .card-info h3 {
+  font-size: 13px;
+  font-weight: 700;
 }
 
-.orbit-badge{
-    position:absolute;
-    top:10px;
-    right:10px;
-    padding:4px 10px;
-    border-radius:999px;
-    font-size:11px;
-    background:rgba(255,255,255,.10);
-    border:1px solid rgba(255,255,255,.12);
-    backdrop-filter: blur(10px);
-    z-index:2;
+.big-card .card-info p {
+  font-size: 11px;
+  opacity: 0.8;
+  margin-top: 3px;
+  color: #ff7bff;
 }
 
-.orbit-badge.orange{
-    background:rgba(255,138,61,.18);
-    border-color:rgba(255,138,61,.35);
+/* ================================
+   HORIZONTAL SCROLL ROW
+================================ */
+.scroll-row {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 8px;
 }
 
-/* LAST SECTION SPACING */
-.orbit-last{
-    padding-bottom:15px;
+.scroll-row::-webkit-scrollbar {
+  height: 6px;
 }
 
-/* BOTTOM NAV */
-.orbit-bottom-nav{
-    position:fixed;
-    bottom:0;
-    left:50%;
-    transform:translateX(-50%);
-    width:100%;
-    max-width:520px;
-    height:80px;
-    background: linear-gradient(to top, rgba(7,10,20,.96), rgba(7,10,20,.40));
-    border-top:1px solid rgba(255,255,255,.08);
-    backdrop-filter: blur(12px);
-    display:flex;
-    justify-content:space-around;
-    align-items:flex-end;
-    padding:12px 12px 14px 12px;
-    z-index:50;
+.scroll-row::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 99px;
 }
 
-.orbit-nav-item{
-    flex:1;
-    height:54px;
-    border-radius:18px;
-    background:rgba(255,255,255,.04);
-    border:1px solid rgba(255,255,255,.08);
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    gap:4px;
-    color:rgba(255,255,255,.70);
-    cursor:pointer;
-    font-size:12px;
+/* ================================
+   ANIME CARD (POSTER STYLE)
+================================ */
+.anime-card {
+  width: 140px;
+  flex-shrink: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #111127;
+  position: relative;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.35);
 }
 
-.orbit-nav-item.active{
-    background:rgba(34,211,238,.12);
-    border-color:rgba(34,211,238,.20);
-    color:white;
+.anime-card img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  filter: brightness(0.85);
 }
 
-.orbit-nav-icon{
-    font-size:18px;
+.anime-card .anime-info {
+  padding: 10px;
 }
 
-.orbit-nav-text{
-    font-size:11px;
+.anime-card .anime-info h3 {
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.orbit-nav-search{
-    width:66px;
-    height:66px;
-    margin-bottom:14px;
-    border-radius:26px;
-    border:1px solid rgba(255,255,255,.16);
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.18), rgba(255,255,255,.06)),
-                linear-gradient(135deg, rgba(34,211,238,.22), rgba(168,85,247,.22));
-    box-shadow:0 18px 44px rgba(0,0,0,.65);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    font-size:22px;
-    color:white;
+.anime-card .anime-info p {
+  font-size: 11px;
+  margin-top: 5px;
+  opacity: 0.7;
+}
+
+.episode-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: rgba(255, 136, 0, 0.85);
+  color: white;
+}
+
+/* ================================
+   GRID PAGE LIST (List + History)
+================================ */
+.anime-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.anime-grid .anime-card {
+  width: 100%;
+}
+
+.anime-grid .anime-card img {
+  height: 220px;
+}
+
+/* ================================
+   PROFILE CARD
+================================ */
+.profile-card {
+  width: 100%;
+  background: #111127;
+  padding: 18px;
+  border-radius: 18px;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.35);
+}
+
+.profile-card h3 {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.profile-card p {
+  opacity: 0.8;
+  font-size: 13px;
+}
+
+.profile-card .small {
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+/* ================================
+   BOTTOM NAV
+================================ */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 76px;
+  background: rgba(10, 10, 25, 0.95);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 200;
+}
+
+.nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  transition: 0.2s;
+}
+
+.nav-btn .icon {
+  font-size: 18px;
+}
+
+.nav-btn.active {
+  color: #00ffff;
+}
+
+.search-btn {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00ffff, #ff00ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -30px;
+  box-shadow: 0px 0px 25px rgba(0, 255, 255, 0.4);
+}
+
+.search-btn .icon {
+  font-size: 22px;
+  color: black;
+}
+
+/* ================================
+   SEARCH MODAL
+================================ */
+.search-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 18px;
+}
+
+.search-modal.active {
+  display: flex;
+}
+
+.search-box {
+  width: 100%;
+  max-width: 520px;
+  background: #0c0c1d;
+  border-radius: 20px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0px 0px 35px rgba(0, 0, 0, 0.55);
+}
+
+.search-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.search-header h3 {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.search-header button {
+  color: white;
+  font-size: 18px;
+  opacity: 0.7;
+}
+
+#searchInput {
+  width: 100%;
+  padding: 14px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  outline: none;
+  background: #111127;
+  color: white;
+  font-size: 13px;
+}
+
+#searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.search-results {
+  margin-top: 14px;
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.search-results::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search-results::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 99px;
+}
+
+/* Search item */
+.search-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 14px;
+  margin-bottom: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  transition: 0.2s;
+}
+
+.search-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.search-item img {
+  width: 55px;
+  height: 70px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.search-item h4 {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.search-item p {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 5px;
+}
+
+/* ================================
+   SIDEBAR
+================================ */
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: -280px;
+  width: 270px;
+  height: 100%;
+  background: #0b0b18;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  transition: 0.25s;
+  z-index: 1000;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar.active {
+  right: 0;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.sidebar-header h2 {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.close-btn {
+  font-size: 18px;
+  color: white;
+  opacity: 0.7;
+}
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar-link {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  font-weight: 600;
+  font-size: 13px;
+  transition: 0.2s;
+}
+
+.sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.sidebar-link.active {
+  background: rgba(0, 255, 255, 0.15);
+  color: #00ffff;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 18px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* ================================
+   OVERLAY
+================================ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: none;
+  z-index: 900;
+}
+
+.overlay.active {
+  display: block;
+}
+
+/* ================================
+   RESPONSIVE
+================================ */
+@media (max-width: 420px) {
+  .anime-card {
+    width: 130px;
+  }
+
+  .anime-card img {
+    height: 175px;
+  }
 }

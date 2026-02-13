@@ -1,174 +1,246 @@
-const API_BASE = '/api'; 
+/* =====================================
+   GLOBAL STATE
+===================================== */
+const homePage = document.getElementById("homePage");
+const listPage = document.getElementById("listPage");
+const historyPage = document.getElementById("historyPage");
+const profilePage = document.getElementById("profilePage");
 
-// --- KONFIGURASI GENRE BERANDA (SMART KEYWORDS) ---
-const GENRE_CONFIG = [
-  { label: "LayarOtaku Update", query: "ongoing", targetId: "layarOtakuList" },
-  { label: "Nimegami Update", query: "movie", targetId: "nimegamiList" },
-  { label: "Donghua Terbaru", query: "donghua", targetId: "donghuaList" }
-];
+const continueContainer = document.getElementById("continueWatching");
+const latestContainer = document.getElementById("latestUpdate");
+const movieContainer = document.getElementById("movieUpdate");
+const donghuaContainer = document.getElementById("donghuaUpdate");
 
-// --- STORAGE KEY ---
-const STORAGE_CONTINUE = "continueWatching";
+const animeListContainer = document.getElementById("animeList");
+const historyContainer = document.getElementById("historyList");
 
-// ==============================
-// UTILITY
-// ==============================
-function saveContinueWatching(data){
-  localStorage.setItem(STORAGE_CONTINUE, JSON.stringify(data));
-}
+const searchModal = document.getElementById("searchModal");
+const searchInput = document.getElementById("searchInput");
+const searchResults = document.getElementById("searchResults");
 
-function loadContinueWatching(){
-  try{
-    return JSON.parse(localStorage.getItem(STORAGE_CONTINUE)) || [];
-  }catch(err){
-    return [];
+const openSearchBtn = document.getElementById("openSearchBtn");
+const closeSearchBtn = document.getElementById("closeSearchBtn");
+
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+const openSidebarBtn = document.getElementById("openSidebarBtn");
+const closeSidebarBtn = document.getElementById("closeSidebarBtn");
+
+const navButtons = document.querySelectorAll(".nav-btn");
+const sidebarLinks = document.querySelectorAll(".sidebar-link");
+
+/* =====================================
+   PAGE NAVIGATION
+===================================== */
+function switchPage(page) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".sidebar-link").forEach(l => l.classList.remove("active"));
+
+  if (page === "home") {
+    homePage.classList.add("active");
   }
-}
-
-function addContinueWatching(item){
-  let current = loadContinueWatching();
-
-  current = current.filter(x => x.link !== item.link);
-  current.unshift(item);
-
-  if(current.length > 10){
-    current = current.slice(0, 10);
+  if (page === "list") {
+    listPage.classList.add("active");
   }
-
-  saveContinueWatching(current);
-}
-
-function createCardHTML(item, type="normal"){
-  let title = item.title || item.name || "Unknown Title";
-  let thumb = item.thumb || item.image || item.poster || "";
-  let link = item.link || item.url || "#";
-  let ep = item.episode || item.ep || item.on || "";
-
-  if(type === "continue"){
-    return `
-      <div class="orbit-card" data-link="${link}">
-        <img src="${thumb}" alt="${title}">
-        <div class="orbit-info">
-          <div class="orbit-title">${title}</div>
-          <div class="orbit-ep">Ep ${ep || 1}</div>
-        </div>
-      </div>
-    `;
+  if (page === "history") {
+    historyPage.classList.add("active");
+  }
+  if (page === "profile") {
+    profilePage.classList.add("active");
   }
 
+  document.querySelectorAll(`[data-page="${page}"]`).forEach(el => {
+    el.classList.add("active");
+  });
+
+  sidebar.classList.remove("active");
+  overlay.classList.remove("active");
+}
+
+navButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    const page = btn.dataset.page;
+    if (page) switchPage(page);
+  });
+});
+
+sidebarLinks.forEach(link => {
+  link.addEventListener("click", e => {
+    e.preventDefault();
+    const page = link.dataset.page;
+    switchPage(page);
+  });
+});
+
+/* =====================================
+   SIDEBAR
+===================================== */
+openSidebarBtn.addEventListener("click", () => {
+  sidebar.classList.add("active");
+  overlay.classList.add("active");
+});
+
+closeSidebarBtn.addEventListener("click", () => {
+  sidebar.classList.remove("active");
+  overlay.classList.remove("active");
+});
+
+overlay.addEventListener("click", () => {
+  sidebar.classList.remove("active");
+  overlay.classList.remove("active");
+});
+
+/* =====================================
+   SEARCH MODAL
+===================================== */
+openSearchBtn.addEventListener("click", () => {
+  searchModal.classList.add("active");
+  searchInput.focus();
+});
+
+closeSearchBtn.addEventListener("click", () => {
+  searchModal.classList.remove("active");
+});
+
+searchModal.addEventListener("click", (e) => {
+  if (e.target === searchModal) {
+    searchModal.classList.remove("active");
+  }
+});
+
+/* =====================================
+   RENDER FUNCTIONS
+===================================== */
+
+function createBigCard(anime) {
   return `
-    <div class="orbit-card" data-link="${link}">
-      <img src="${thumb}" alt="${title}">
-      ${ep ? `<div class="orbit-badge orange">ON ${ep}</div>` : `<div class="orbit-badge">Update</div>`}
-      <div class="orbit-info">
-        <div class="orbit-title">${title}</div>
+    <div class="big-card">
+      <img src="${anime.thumbnail || anime.image || ''}" alt="${anime.title}">
+      <div class="card-info">
+        <h3>${anime.title}</h3>
+        <p>${anime.episode || "Episode 1"}</p>
       </div>
     </div>
   `;
 }
 
-function renderList(targetId, data, type="normal"){
-  const container = document.getElementById(targetId);
-  if(!container) return;
+function createAnimeCard(anime) {
+  return `
+    <div class="anime-card">
+      ${anime.episode ? `<div class="episode-badge">${anime.episode}</div>` : ""}
+      <img src="${anime.thumbnail || anime.image || ''}" alt="${anime.title}">
+      <div class="anime-info">
+        <h3>${anime.title}</h3>
+        <p>${anime.status || ""}</p>
+      </div>
+    </div>
+  `;
+}
 
-  container.innerHTML = "";
+function createSearchItem(anime) {
+  return `
+    <div class="search-item">
+      <img src="${anime.thumbnail || anime.image || ''}" alt="${anime.title}">
+      <div>
+        <h4>${anime.title}</h4>
+        <p>${anime.status || ""}</p>
+      </div>
+    </div>
+  `;
+}
 
-  if(!data || data.length === 0){
-    container.innerHTML = `<p style="color:rgba(255,255,255,.5)">Tidak ada data.</p>`;
+/* =====================================
+   FETCH DATA
+===================================== */
+
+async function fetchLatest() {
+  try {
+    const res = await fetch("/api/latest");
+    const data = await res.json();
+
+    renderHome(data);
+    renderList(data);
+  } catch (err) {
+    console.error("Failed fetch latest:", err);
+  }
+}
+
+function renderHome(data) {
+  continueContainer.innerHTML = "";
+  latestContainer.innerHTML = "";
+  movieContainer.innerHTML = "";
+  donghuaContainer.innerHTML = "";
+
+  const firstTwo = data.slice(0, 2);
+  firstTwo.forEach(anime => {
+    continueContainer.innerHTML += createBigCard(anime);
+  });
+
+  data.slice(0, 10).forEach(anime => {
+    latestContainer.innerHTML += createAnimeCard(anime);
+  });
+
+  data.slice(5, 15).forEach(anime => {
+    movieContainer.innerHTML += createAnimeCard(anime);
+  });
+
+  data.slice(10, 20).forEach(anime => {
+    donghuaContainer.innerHTML += createAnimeCard(anime);
+  });
+}
+
+function renderList(data) {
+  animeListContainer.innerHTML = "";
+  data.forEach(anime => {
+    animeListContainer.innerHTML += createAnimeCard(anime);
+  });
+}
+
+/* =====================================
+   SEARCH FUNCTION
+===================================== */
+let searchTimeout;
+
+searchInput.addEventListener("input", () => {
+  clearTimeout(searchTimeout);
+
+  const query = searchInput.value.trim();
+  if (!query) {
+    searchResults.innerHTML = "";
     return;
   }
 
-  data.forEach(item => {
-    container.innerHTML += createCardHTML(item, type);
-  });
+  searchTimeout = setTimeout(async () => {
+    try {
+      const res = await fetch(`/api/search?q=${query}`);
+      const data = await res.json();
 
-  // Click handler (tidak mengubah backend, hanya redirect link)
-  container.querySelectorAll(".orbit-card").forEach(card => {
-    card.addEventListener("click", () => {
-      const link = card.getAttribute("data-link");
-      if(link && link !== "#"){
-        addContinueWatching({ ...data.find(x => (x.link || x.url) === link), link });
-        window.location.href = link;
-      }
-    });
-  });
-}
+      searchResults.innerHTML = "";
+      data.forEach(anime => {
+        searchResults.innerHTML += createSearchItem(anime);
+      });
 
-// ==============================
-// FETCH API
-// ==============================
-async function fetchAnime(query){
-  try{
-    const res = await fetch(`${API_BASE}?search=${encodeURIComponent(query)}`);
-    const json = await res.json();
-    return json.results || json.data || json || [];
-  }catch(err){
-    console.error("Fetch error:", err);
-    return [];
-  }
-}
-
-// ==============================
-// INIT HOME
-// ==============================
-async function initHome(){
-  // Continue Watching
-  const continueData = loadContinueWatching();
-  renderList("continueWatching", continueData.slice(0,2), "continue");
-
-  // Section data fetch
-  for(const g of GENRE_CONFIG){
-    const result = await fetchAnime(g.query);
-    renderList(g.targetId, result.slice(0,3), "normal");
-  }
-}
-
-// ==============================
-// SEARCH
-// ==============================
-function initSearch(){
-  const searchInput = document.getElementById("searchInput");
-  if(!searchInput) return;
-
-  searchInput.addEventListener("keyup", async (e) => {
-    const q = e.target.value.trim();
-    if(q.length < 2) return;
-
-    const results = await fetchAnime(q);
-
-    // Override hasil pencarian ke LayarOtakuList agar tetap rapi
-    renderList("layarOtakuList", results.slice(0,3), "normal");
-  });
-}
-
-// ==============================
-// BOTTOM NAV (UI ONLY)
-// ==============================
-function initBottomNav(){
-  const navHome = document.getElementById("navHome");
-  const navSearch = document.getElementById("navSearch");
-
-  if(navHome){
-    navHome.addEventListener("click", () => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  }
-
-  if(navSearch){
-    navSearch.addEventListener("click", () => {
-      const searchInput = document.getElementById("searchInput");
-      if(searchInput){
-        searchInput.focus();
-      }
-    });
-  }
-}
-
-// ==============================
-// RUN
-// ==============================
-document.addEventListener("DOMContentLoaded", () => {
-  initHome();
-  initSearch();
-  initBottomNav();
+    } catch (err) {
+      console.error("Search error:", err);
+    }
+  }, 400);
 });
+
+/* =====================================
+   HISTORY (LOCAL STORAGE)
+===================================== */
+function loadHistory() {
+  const history = JSON.parse(localStorage.getItem("animeHistory")) || [];
+  historyContainer.innerHTML = "";
+
+  history.forEach(anime => {
+    historyContainer.innerHTML += createAnimeCard(anime);
+  });
+}
+
+/* =====================================
+   INIT
+===================================== */
+fetchLatest();
+loadHistory();
