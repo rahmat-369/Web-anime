@@ -15,16 +15,23 @@
             <div class="logo-sub">R_hmt ofc</div>
         </div>
         <div class="user-avatar" onclick="goProfile()">
-            <img src="https://a.top4top.io/p_36880pr920.jpeg" alt="User">
+            <img src="https://e.top4top.io/p_369675i750.png" alt="User">
         </div>
     </header>
 
-    <div id="resume-toast" class="resume-toast hidden">
-        <div class="resume-content">
-            <span id="resume-text">Lanjut nonton...</span>
-            <div class="resume-actions">
-                <button onclick="confirmResume()" class="btn-resume-yes">▶</button>
-                <button onclick="closeResume()" class="btn-resume-no">✕</button>
+    <div id="resume-toast" class="mini-player-container hidden">
+        <div class="mini-player-content">
+            <div class="mp-info">
+                <span class="mp-label">Lanjutkan Menonton</span>
+                <span id="resume-text" class="mp-title">Loading...</span>
+            </div>
+            <div class="mp-controls">
+                <button onclick="confirmResume()" class="mp-btn-play" aria-label="Play">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <button onclick="closeResume()" class="mp-btn-close" aria-label="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
             </div>
         </div>
     </div>
@@ -118,10 +125,10 @@
         </div>
 
         <div id="profile-view" class="hidden">
-            <div class="profile-banner"></div>
+            <div class="profile-banner" style="background-image: url('https://j.top4top.io/p_36895t2sb0.jpeg');"></div>
             
             <div class="profile-card-overlay">
-                <img src="https://a.top4top.io/p_36880pr920.jpeg" class="big-avatar">
+                <img src="https://e.top4top.io/p_369675i750.png" class="big-avatar">
                 <h2>R_hmt ofc</h2>
                 <p class="role-badge">Developer & Admin</p>
                 
@@ -131,23 +138,34 @@
                 </div>
 
                 <div class="profile-menu">
-                    <div class="menu-item" onclick="alert('Fitur belum tersedia')">
-                        <div class="menu-icon">📜</div>
+                    <div class="menu-item" onclick="alert('Fitur riwayat ada di halaman Home')">
+                        <div class="menu-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        </div>
                         <span>Riwayat Tontonan</span>
                         <div class="menu-arrow">›</div>
                     </div>
-                    <div class="menu-item" onclick="alert('Fitur belum tersedia')">
-                        <div class="menu-icon">📩</div>
+                    
+                    <div class="menu-item" onclick="alert('Fitur Request segera hadir')">
+                        <div class="menu-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        </div>
                         <span>Request Anime</span>
                         <div class="menu-arrow">›</div>
                     </div>
-                    <div class="menu-item" onclick="alert('Silakan hubungi admin via WA')">
-                        <div class="menu-icon">🐛</div>
+                    
+                    <div class="menu-item" onclick="window.location.href='mailto:support@rhmt.ofc'">
+                        <div class="menu-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        </div>
                         <span>Lapor Bug / Error</span>
                         <div class="menu-arrow">›</div>
                     </div>
+                    
                     <div class="menu-item" onclick="window.open('https://whatsapp.com/channel/0029Vb6ukqnHQbS4mKP0j80L', '_blank')">
-                        <div class="menu-icon">💬</div>
+                        <div class="menu-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        </div>
                         <span>Join Channel WhatsApp</span>
                         <div class="menu-arrow">›</div>
                     </div>

@@ -27,14 +27,17 @@ function switchView(viewId) {
     // Tampilkan view target
     showEl(viewId);
     
-    // Header logic: Sembunyikan header utama hanya di Watch View
-    if (viewId === 'watch-view') {
-        hideEl('main-header');
+    // Logic Header Visibility (Hilang di Profile & Watch)
+    const header = getEl('main-header');
+    if (viewId === 'profile-view' || viewId === 'watch-view') {
+        header.style.opacity = '0';
+        setTimeout(() => header.classList.add('hidden'), 300); // Wait fade out
     } else {
-        showEl('main-header');
+        header.classList.remove('hidden');
+        setTimeout(() => header.style.opacity = '1', 10);
     }
     
-    // Bottom Nav Logic
+    // Bottom Nav Active Logic
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     
     if (viewId === 'home-view') getEl('nav-home')?.classList.add('active');
@@ -230,7 +233,7 @@ function startWatchSession(epUrl, epNum, startTime = 0) {
 
 async function loadVideo(epUrl, epNum) {
     loader(true);
-    switchView('watch-view');
+    switchView('watch-view'); // Pastikan ini dipanggil untuk switch DOM
     
     getEl('video-title').innerText = `${currentWatchContext.title || 'Anime'} - Ep ${epNum}`;
     getEl('current-ep-badge').innerText = `Ep ${epNum}`;
@@ -280,7 +283,7 @@ function renderWatchPlaylist(currentEpNum) {
     }).join('');
 }
 
-// --- HISTORY & RESUME (FIXED) ---
+// --- HISTORY & RESUME (FIXED REFRESH BUG) ---
 function startWatchTimer(epUrl, epNum) {
     stopWatchTimer();
     saveToHistory(epUrl, epNum, trackedSeconds);
@@ -344,41 +347,42 @@ function renderHistorySection() {
     `).join('');
 }
 
-// FIX UTAMA: Resume tanpa Refresh
+// FIX: Resume menggunakan switchView bukan location.href
 async function resumeVideo(epUrl, epNum, mainUrl, title, image, seconds) {
-    // 1. Set context secara manual
+    // 1. Set context manual
     currentWatchContext = { title, image, mainUrl };
     
-    // 2. Langsung tampilkan loader dan pindah ke view watch (biar user tau ada proses)
+    // 2. UI Feedback immediate
     loader(true);
     switchView('watch-view');
-    getEl('video-title').innerText = "Memuat data...";
+    getEl('video-title').innerText = "Sedang memuat...";
     
-    // 3. Fetch list episode di background ('data' mode)
+    // 3. Silent Load Playlist
     const success = await loadDetail(mainUrl, 'data');
     
-    // 4. Jika sukses, baru putar video. Jika gagal, stop loading.
     if(success) {
         startWatchSession(epUrl, epNum, seconds);
     } else {
-        alert("Gagal melanjutkan video. Silakan coba cari anime ini secara manual.");
+        alert("Gagal melanjutkan. Silakan buka manual.");
         goHome();
         loader(false);
     }
 }
 
-// --- POPUP RESUME ---
+// --- POPUP RESUME (MINI PLAYER) ---
 function checkResumePopup() {
     const history = JSON.parse(localStorage.getItem('watchHistory')) || [];
     if (history.length > 0) {
         const last = history[0];
         if ((new Date().getTime() - last.date) < 86400000) {
-            getEl('resume-text').innerText = `Lanjut ${last.title} Ep ${last.epNum}?`;
-            getEl('resume-toast').dataset.resumeData = JSON.stringify(last);
+            // Update Text
+            getEl('resume-text').innerText = `${last.title} - Ep ${last.epNum}`;
             
+            // Simpan data di element untuk diambil saat klik play
             const toast = getEl('resume-toast');
+            toast.dataset.resumeData = JSON.stringify(last);
+            
             toast.classList.remove('hidden');
-            setTimeout(() => { toast.classList.add('hidden'); }, 8000);
         }
     }
 }
