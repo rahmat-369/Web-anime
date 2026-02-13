@@ -1,221 +1,132 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OrbitCloud - Realtime Engine</title>
-    <link rel="stylesheet" href="./style.css" />
-  </head>
-  <body>
-    <div class="app">
-      <!-- Top Bar -->
-      <header class="topbar">
-        <div class="brand">
-          <div class="brand-logo" aria-hidden="true">
-            <span class="cloud"></span>
-            <span class="dot"></span>
-          </div>
-          <div class="brand-text">
-            <div class="brand-name">OrbitCloud</div>
-            <div class="brand-sub">REALTIME ENGINE</div>
-          </div>
-        </div>
-        <button id="btnAvatar" class="avatar" title="Profile">
-          <span class="avatar-img" aria-hidden="true"></span>
-        </button>
-      </header>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NimeStream 2026 • R_hmt ofc</title>
 
-      <!-- Main Content -->
-      <main id="main" class="main">
-        <!-- Home View -->
-        <section id="viewHome" class="view view--active" data-view="home">
-          <div class="section">
-            <div class="section-head">
-              <div class="section-title">
-                <span class="section-accent accent-pink"></span>
-                <h2>Lanjutkan Menonton</h2>
-              </div>
-              <button class="pill-btn" data-action="see-all" data-target="continue">Lihat Semua</button>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- TOP HEADER -->
+    <header class="orbit-header">
+        <div class="orbit-brand">
+            <div class="orbit-logo">
+                <span class="orbit-cloud"></span>
+                <span class="orbit-dot"></span>
             </div>
-
-            <div id="continueRow" class="row row--two">
-              <!-- filled by JS -->
-              <div class="skeleton-card"></div>
-              <div class="skeleton-card"></div>
+            <div class="orbit-title">
+                <h1>OrbitCloud</h1>
+                <p>REALTIME ENGINE</p>
             </div>
-          </div>
-
-          <div class="section">
-            <div class="section-head">
-              <div class="section-title">
-                <span class="section-accent accent-orange"></span>
-                <h2>LayarOtaku Update</h2>
-              </div>
-              <span class="pill pill--orange">Ongoing</span>
-            </div>
-
-            <div id="otakuGrid" class="grid grid--three">
-              <!-- filled by JS -->
-              <div class="skeleton-tile"></div>
-              <div class="skeleton-tile"></div>
-              <div class="skeleton-tile"></div>
-            </div>
-          </div>
-
-          <div class="section">
-            <div class="section-head">
-              <div class="section-title">
-                <span class="section-accent accent-cyan"></span>
-                <h2>Nimegami Update</h2>
-              </div>
-              <span class="pill pill--cyan">Anime &amp; Movie</span>
-            </div>
-
-            <div id="nimeGrid" class="grid grid--three">
-              <!-- filled by JS -->
-              <div class="skeleton-tile"></div>
-              <div class="skeleton-tile"></div>
-              <div class="skeleton-tile"></div>
-            </div>
-          </div>
-
-          <div class="section section--last">
-            <div class="section-head">
-              <div class="section-title">
-                <span class="section-accent accent-purple"></span>
-                <h2>Donghua Terbaru</h2>
-              </div>
-              <span class="pill pill--purple">Anichin</span>
-            </div>
-
-            <div id="donghuaGrid" class="grid grid--three">
-              <!-- filled by JS -->
-              <div class="skeleton-tile"></div>
-              <div class="skeleton-tile"></div>
-              <div class="skeleton-tile"></div>
-            </div>
-          </div>
-        </section>
-
-        <!-- List View -->
-        <section id="viewList" class="view" data-view="list">
-          <div class="page-head">
-            <h1>List</h1>
-            <p class="muted">Semua anime &amp; update terbaru.</p>
-          </div>
-          <div id="listGrid" class="grid grid--two"></div>
-        </section>
-
-        <!-- History View -->
-        <section id="viewHistory" class="view" data-view="history">
-          <div class="page-head">
-            <h1>History</h1>
-            <p class="muted">Riwayat tontonan kamu.</p>
-          </div>
-          <div id="historyGrid" class="grid grid--two"></div>
-        </section>
-
-        <!-- Profile View -->
-        <section id="viewProfile" class="view" data-view="profile">
-          <div class="page-head">
-            <h1>Profile</h1>
-            <p class="muted">Pengaturan akun &amp; preferensi.</p>
-          </div>
-
-          <div class="card">
-            <div class="card-row">
-              <div class="avatar avatar--large" aria-hidden="true">
-                <span class="avatar-img"></span>
-              </div>
-              <div class="card-col">
-                <div class="card-title">Guest</div>
-                <div class="card-sub">Masuk untuk sinkronisasi history.</div>
-              </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <button class="row-btn" id="btnClearHistory">Hapus History Lokal</button>
-            <button class="row-btn row-btn--danger" id="btnResetContinue">Reset Lanjutkan Menonton</button>
-          </div>
-        </section>
-
-        <!-- Player / Modal -->
-        <div id="playerModal" class="modal" aria-hidden="true">
-          <div class="modal-backdrop" data-action="close-player"></div>
-          <div class="modal-sheet">
-            <div class="modal-head">
-              <div class="modal-title">
-                <div id="playerTitle" class="modal-name">Memutar...</div>
-                <div id="playerMeta" class="modal-meta">Episode</div>
-              </div>
-              <button class="icon-btn" data-action="close-player" title="Tutup">✕</button>
-            </div>
-            <div class="modal-body">
-              <div class="video-frame">
-                <iframe
-                  id="playerFrame"
-                  title="Player"
-                  src=""
-                  loading="lazy"
-                  referrerpolicy="no-referrer"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                ></iframe>
-              </div>
-
-              <div class="modal-actions">
-                <button id="btnNextEp" class="pill-btn pill-btn--solid">Episode Berikutnya</button>
-                <button id="btnOpenSource" class="pill-btn">Buka Sumber</button>
-              </div>
-            </div>
-          </div>
         </div>
 
-        <!-- Search Overlay -->
-        <div id="searchOverlay" class="search" aria-hidden="true">
-          <div class="search-top">
-            <div class="search-box">
-              <span class="search-icon" aria-hidden="true">⌕</span>
-              <input id="searchInput" type="text" placeholder="Cari anime..." autocomplete="off" />
-              <button id="searchClear" class="icon-btn" title="Hapus">✕</button>
-            </div>
-            <button id="searchClose" class="pill-btn">Tutup</button>
-          </div>
-
-          <div class="search-body">
-            <div class="search-hint muted" id="searchHint">Ketik untuk mulai mencari.</div>
-            <div id="searchResults" class="grid grid--two"></div>
-          </div>
+        <div class="orbit-profile">
+            <img src="https://i.ibb.co/3vY0ZVx/avatar.png" alt="Profile">
         </div>
-      </main>
+    </header>
 
-      <!-- Bottom Nav -->
-      <nav class="bottomnav" aria-label="Navigasi">
-        <button class="navitem navitem--active" data-nav="home" title="Home">
-          <span class="navicon">⌂</span>
-          <span class="navtext">Home</span>
-        </button>
-        <button class="navitem" data-nav="list" title="List">
-          <span class="navicon">≡</span>
-          <span class="navtext">List</span>
+    <!-- MAIN CONTENT -->
+    <main class="orbit-main">
+
+        <!-- SEARCH SECTION -->
+        <div class="orbit-searchbox">
+            <input id="searchInput" type="text" placeholder="Cari anime..." />
+        </div>
+
+        <!-- Continue Watching -->
+        <section class="orbit-section">
+            <div class="orbit-section-header">
+                <div class="orbit-section-title pink">
+                    <span class="orbit-line"></span>
+                    <h2>Lanjutkan Menonton</h2>
+                </div>
+                <button class="orbit-btn" id="btnSeeAllContinue">Lihat Semua</button>
+            </div>
+
+            <div class="orbit-grid-continue" id="continueWatching">
+                <!-- diisi oleh JS -->
+            </div>
+        </section>
+
+        <!-- LayarOtaku -->
+        <section class="orbit-section">
+            <div class="orbit-section-header">
+                <div class="orbit-section-title orange">
+                    <span class="orbit-line"></span>
+                    <h2>LayarOtaku Update</h2>
+                </div>
+                <span class="orbit-pill orange">Ongoing</span>
+            </div>
+
+            <div class="orbit-grid-3" id="layarOtakuList">
+                <!-- diisi oleh JS -->
+            </div>
+        </section>
+
+        <!-- Nimegami -->
+        <section class="orbit-section">
+            <div class="orbit-section-header">
+                <div class="orbit-section-title cyan">
+                    <span class="orbit-line"></span>
+                    <h2>Nimegami Update</h2>
+                </div>
+                <span class="orbit-pill cyan">Anime & Movie</span>
+            </div>
+
+            <div class="orbit-grid-3" id="nimegamiList">
+                <!-- diisi oleh JS -->
+            </div>
+        </section>
+
+        <!-- Donghua -->
+        <section class="orbit-section orbit-last">
+            <div class="orbit-section-header">
+                <div class="orbit-section-title purple">
+                    <span class="orbit-line"></span>
+                    <h2>Donghua Terbaru</h2>
+                </div>
+                <span class="orbit-pill purple">Anichin</span>
+            </div>
+
+            <div class="orbit-grid-3" id="donghuaList">
+                <!-- diisi oleh JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="orbit-bottom-nav">
+        <button class="orbit-nav-item active" id="navHome">
+            <span class="orbit-nav-icon">🏠</span>
+            <span class="orbit-nav-text">Home</span>
         </button>
 
-        <button id="fabSearch" class="fab" title="Search" aria-label="Search">
-          <span class="fab-inner">⌕</span>
+        <button class="orbit-nav-item" id="navList">
+            <span class="orbit-nav-icon">📑</span>
+            <span class="orbit-nav-text">List</span>
         </button>
 
-        <button class="navitem" data-nav="history" title="History">
-          <span class="navicon">◷</span>
-          <span class="navtext">History</span>
+        <button class="orbit-nav-search" id="navSearch">
+            <span>🔍</span>
         </button>
-        <button class="navitem" data-nav="profile" title="Profile">
-          <span class="navicon">☺</span>
-          <span class="navtext">Profile</span>
-        </button>
-      </nav>
-    </div>
 
-    <script src="./app.js"></script>
-  </body>
+        <button class="orbit-nav-item" id="navHistory">
+            <span class="orbit-nav-icon">🕒</span>
+            <span class="orbit-nav-text">History</span>
+        </button>
+
+        <button class="orbit-nav-item" id="navProfile">
+            <span class="orbit-nav-icon">👤</span>
+            <span class="orbit-nav-text">Profile</span>
+        </button>
+    </nav>
+
+    <!-- Script -->
+    <script src="app.js"></script>
+
+</body>
 </html>
