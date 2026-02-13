@@ -9,21 +9,21 @@
 </head>
 <body>
 
-    <header class="top-header">
+    <header class="top-header" id="main-header">
         <div class="brand-container">
             <div class="logo-text">WatchNime</div>
             <div class="logo-sub">R_hmt ofc</div>
         </div>
-        <div class="user-avatar" onclick="showProfile()">
+        <div class="user-avatar" onclick="goProfile()">
             <img src="https://a.top4top.io/p_36880pr920.jpeg" alt="User">
         </div>
     </header>
 
     <div id="resume-toast" class="resume-toast hidden">
         <div class="resume-content">
-            <span id="resume-text">Lanjut nonton Boruto Ep 12?</span>
+            <span id="resume-text">Lanjut nonton...</span>
             <div class="resume-actions">
-                <button onclick="confirmResume()" class="btn-resume-yes">Lanjut ▶</button>
+                <button onclick="confirmResume()" class="btn-resume-yes">▶</button>
                 <button onclick="closeResume()" class="btn-resume-no">✕</button>
             </div>
         </div>
@@ -53,7 +53,6 @@
                 </div>
                 <div id="history-list" class="horizontal-scroll large-cards"></div>
             </div>
-
             <div id="home-content"></div>
         </div>
 
@@ -83,7 +82,6 @@
                 <span>Detail Anime</span>
             </div>
             <div id="anime-info"></div>
-            
             <div class="section-divider">
                 <h3>Daftar Episode</h3>
             </div>
@@ -112,27 +110,52 @@
 
             <div class="watch-playlist">
                 <div class="section-divider">
-                    <h3>Ganti Episode</h3>
+                    <h3>Playlist</h3>
                     <span class="badge-soft" id="current-ep-badge">Ep ?</span>
                 </div>
-                <div class="episode-list-horizontal" id="watch-episode-list">
-                    </div>
+                <div class="episode-list-horizontal" id="watch-episode-list"></div>
             </div>
         </div>
 
         <div id="profile-view" class="hidden">
-            <div class="profile-card">
+            <div class="profile-banner"></div>
+            
+            <div class="profile-card-overlay">
                 <img src="https://a.top4top.io/p_36880pr920.jpeg" class="big-avatar">
                 <h2>R_hmt ofc</h2>
-                <p>Admin & Developer</p>
-                <div class="profile-actions">
-                     <a href="https://whatsapp.com/channel/0029Vb6ukqnHQbS4mKP0j80L" target="_blank" class="wa-btn">
-                        Join WhatsApp Channel
-                    </a>
+                <p class="role-badge">Developer & Admin</p>
+                
+                <div class="disclaimer-box">
+                    <strong>⚠️ Informasi Penting</strong>
+                    <p>Web ini dibuat semata-mata untuk tujuan pembelajaran (Educational Purpose). Jika Anda menemukan bug, error, video tidak bisa diputar, atau ketidakstabilan lainnya, mohon dimaklumi.</p>
                 </div>
-                <div class="info-text">
-                    <p>NimeStream 2026. UI Design inspired by OrbitCloud.</p>
+
+                <div class="profile-menu">
+                    <div class="menu-item" onclick="alert('Fitur belum tersedia')">
+                        <div class="menu-icon">📜</div>
+                        <span>Riwayat Tontonan</span>
+                        <div class="menu-arrow">›</div>
+                    </div>
+                    <div class="menu-item" onclick="alert('Fitur belum tersedia')">
+                        <div class="menu-icon">📩</div>
+                        <span>Request Anime</span>
+                        <div class="menu-arrow">›</div>
+                    </div>
+                    <div class="menu-item" onclick="alert('Silakan hubungi admin via WA')">
+                        <div class="menu-icon">🐛</div>
+                        <span>Lapor Bug / Error</span>
+                        <div class="menu-arrow">›</div>
+                    </div>
+                    <div class="menu-item" onclick="window.open('https://whatsapp.com/channel/0029Vb6ukqnHQbS4mKP0j80L', '_blank')">
+                        <div class="menu-icon">💬</div>
+                        <span>Join Channel WhatsApp</span>
+                        <div class="menu-arrow">›</div>
+                    </div>
                 </div>
+
+                <button onclick="localStorage.clear(); location.reload()" class="btn-reset">
+                    Reset Cache & History
+                </button>
             </div>
         </div>
 
@@ -142,10 +165,6 @@
         <div class="nav-item active" onclick="goHome()" id="nav-home">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
             <span>Home</span>
-        </div>
-        <div class="nav-item" onclick="goList()" id="nav-list">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg>
-            <span>List</span>
         </div>
         
         <div class="nav-item-center">

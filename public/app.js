@@ -22,15 +22,25 @@ let trackedSeconds = 0;
 
 // --- NAVIGATION ---
 function switchView(viewId) {
+    // Sembunyikan semua view
     ['home-view', 'detail-view', 'watch-view', 'list-view', 'profile-view'].forEach(id => hideEl(id));
+    // Tampilkan view target
     showEl(viewId);
     
+    // Header logic: Sembunyikan header utama hanya di Watch View
+    if (viewId === 'watch-view') {
+        hideEl('main-header');
+    } else {
+        showEl('main-header');
+    }
+    
+    // Bottom Nav Logic
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     
-    if (viewId === 'home-view') getEl('nav-home').classList.add('active');
-    if (viewId === 'list-view') getEl('nav-list').classList.add('active');
-    if (viewId === 'profile-view') getEl('nav-profile').classList.add('active');
+    if (viewId === 'home-view') getEl('nav-home')?.classList.add('active');
+    if (viewId === 'profile-view') getEl('nav-profile')?.classList.add('active');
     
+    // Stop timer jika keluar dari watch
     if (viewId !== 'watch-view') stopWatchTimer();
 }
 
@@ -40,23 +50,17 @@ function goHome() {
     checkResumePopup();
 }
 
-function goList() { switchView('list-view'); }
 function goProfile() { switchView('profile-view'); }
 
-// --- HELPER: EPISODE NUMBER EXTRACTOR (FIXED) ---
+// --- HELPER: EPISODE NUMBER EXTRACTOR ---
 function extractEpNumber(title) {
     if (!title) return '?';
-    // Coba cari pola "Episode 12"
     let match = title.match(/Episode\s+(\d+)/i);
     if (match) return match[1];
-    
-    // Coba cari pola angka saja di akhir string
     match = title.match(/(\d+)$/);
     if (match) return match[1];
-
-    // Coba cari angka di mana saja
     match = title.match(/(\d+)/);
-    return match ? match[1] : title; // Fallback ke title asli jika gagal
+    return match ? match[1] : title;
 }
 
 // --- SEARCH ---
@@ -73,8 +77,9 @@ async function handleSearch(manualQuery = null, isListTab = false) {
     if(!getEl('search-overlay').classList.contains('hidden')) toggleSearch();
     loader(true);
 
-    const targetView = isListTab ? 'list-view' : 'home-view';
-    const containerId = isListTab ? 'list-results' : 'home-content';
+    // Sekarang hasil pencarian selalu pakai layout List
+    const targetView = 'list-view';
+    const containerId = 'list-results';
     
     switchView(targetView);
     const container = getEl(containerId);
@@ -161,9 +166,9 @@ function renderSection(config, list) {
     container.appendChild(div);
 }
 
-// --- DETAIL & WATCH LOGIC (CORE FIX) ---
+// --- DETAIL & WATCH LOGIC ---
 
-// Mode: 'view' (pindah halaman) atau 'data' (cuma ambil data utk playlist)
+// mode: 'view' (pindah hal), 'data' (background fetch)
 async function loadDetail(url, mode = 'view') {
     if (mode === 'view') {
         loader(true);
@@ -197,7 +202,7 @@ async function loadDetail(url, mode = 'view') {
             }).join('');
         }
         
-        return true; // Success signal
+        return true; 
 
     } catch (e) { 
         console.error(e);
@@ -230,7 +235,7 @@ async function loadVideo(epUrl, epNum) {
     getEl('video-title').innerText = `${currentWatchContext.title || 'Anime'} - Ep ${epNum}`;
     getEl('current-ep-badge').innerText = `Ep ${epNum}`;
 
-    // Pastikan playlist ada. Jika kosong (misal refresh), coba load ulang dari context
+    // Ensure playlist exists
     if (currentAnimeEpisodes.length === 0 && currentWatchContext.mainUrl) {
         await loadDetail(currentWatchContext.mainUrl, 'data');
     }
@@ -244,10 +249,8 @@ async function loadVideo(epUrl, epNum) {
         
         const player = getEl('video-player');
         
-        // Filter Server "Mega" (Case Insensitive)
-        const validStreams = data.streams.filter(s => 
-            !s.server.toLowerCase().includes('mega')
-        );
+        // Filter Mega
+        const validStreams = data.streams.filter(s => !s.server.toLowerCase().includes('mega'));
 
         if (validStreams.length > 0) {
             player.src = validStreams[0].url;
@@ -256,7 +259,7 @@ async function loadVideo(epUrl, epNum) {
                     onclick="changeServer('${s.url}', this)">${s.server}</button>
             `).join('');
         } else {
-            alert("Maaf, stream tidak tersedia (Mungkin broken link).");
+            alert("Maaf, stream tidak tersedia.");
         }
     } catch (e) { console.error(e); } 
     finally { loader(false); }
@@ -272,20 +275,17 @@ function renderWatchPlaylist(currentEpNum) {
     const container = getEl('watch-episode-list');
     container.innerHTML = currentAnimeEpisodes.map(ep => {
         const num = extractEpNumber(ep.title);
-        const isActive = (num == currentEpNum) ? 'active' : ''; // Loose comparison for string/number
+        const isActive = (num == currentEpNum) ? 'active' : ''; 
         return `<div class="ep-btn ${isActive}" onclick="startWatchSession('${ep.url}', '${num}')">${num}</div>`;
     }).join('');
 }
 
-// --- HISTORY & TIME TRACKING ---
+// --- HISTORY & RESUME (FIXED) ---
 function startWatchTimer(epUrl, epNum) {
     stopWatchTimer();
-    
-    // Save awal
     saveToHistory(epUrl, epNum, trackedSeconds);
-
     watchTimer = setInterval(() => {
-        trackedSeconds += 10; // Simulasi +10 detik
+        trackedSeconds += 10;
         saveToHistory(epUrl, epNum, trackedSeconds);
     }, 10000); 
 }
@@ -302,11 +302,9 @@ function formatTime(seconds) {
 }
 
 function saveToHistory(epUrl, epNum, seconds) {
-    if (!currentWatchContext.title) return; // Jangan save jika data belum siap
+    if (!currentWatchContext.title) return; 
 
     let history = JSON.parse(localStorage.getItem('watchHistory')) || [];
-    
-    // Hapus duplikat anime yang sama
     history = history.filter(h => h.mainUrl !== currentWatchContext.mainUrl);
     
     history.unshift({
@@ -314,7 +312,7 @@ function saveToHistory(epUrl, epNum, seconds) {
         image: currentWatchContext.image,
         mainUrl: currentWatchContext.mainUrl,
         epUrl: epUrl,
-        epNum: epNum, // Pastikan ini string angka yg valid
+        epNum: epNum,
         seconds: seconds,
         date: new Date().getTime()
     });
@@ -346,16 +344,25 @@ function renderHistorySection() {
     `).join('');
 }
 
+// FIX UTAMA: Resume tanpa Refresh
 async function resumeVideo(epUrl, epNum, mainUrl, title, image, seconds) {
-    // Restore context manual karena load dari localStorage
+    // 1. Set context secara manual
     currentWatchContext = { title, image, mainUrl };
     
+    // 2. Langsung tampilkan loader dan pindah ke view watch (biar user tau ada proses)
     loader(true);
-    // Load detail secara diam-diam ('data' mode) untuk populate playlist
+    switchView('watch-view');
+    getEl('video-title').innerText = "Memuat data...";
+    
+    // 3. Fetch list episode di background ('data' mode)
     const success = await loadDetail(mainUrl, 'data');
+    
+    // 4. Jika sukses, baru putar video. Jika gagal, stop loading.
     if(success) {
         startWatchSession(epUrl, epNum, seconds);
     } else {
+        alert("Gagal melanjutkan video. Silakan coba cari anime ini secara manual.");
+        goHome();
         loader(false);
     }
 }
@@ -365,18 +372,13 @@ function checkResumePopup() {
     const history = JSON.parse(localStorage.getItem('watchHistory')) || [];
     if (history.length > 0) {
         const last = history[0];
-        // 24 jam terakhir
         if ((new Date().getTime() - last.date) < 86400000) {
             getEl('resume-text').innerText = `Lanjut ${last.title} Ep ${last.epNum}?`;
             getEl('resume-toast').dataset.resumeData = JSON.stringify(last);
             
             const toast = getEl('resume-toast');
             toast.classList.remove('hidden');
-            
-            // Auto hide dalam 8 detik
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 8000);
+            setTimeout(() => { toast.classList.add('hidden'); }, 8000);
         }
     }
 }
