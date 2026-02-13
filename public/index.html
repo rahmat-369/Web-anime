@@ -15,9 +15,19 @@
             <div class="logo-sub">R_hmt ofc</div>
         </div>
         <div class="user-avatar" onclick="showProfile()">
-            <img src="https://ui-avatars.com/api/?name=R_hmt&background=0D8ABC&color=fff&rounded=true" alt="User">
+            <img src="https://a.top4top.io/p_36880pr920.jpeg" alt="User">
         </div>
     </header>
+
+    <div id="resume-toast" class="resume-toast hidden">
+        <div class="resume-content">
+            <span id="resume-text">Lanjut nonton Boruto Ep 12?</span>
+            <div class="resume-actions">
+                <button onclick="confirmResume()" class="btn-resume-yes">Lanjut ▶</button>
+                <button onclick="closeResume()" class="btn-resume-no">✕</button>
+            </div>
+        </div>
+    </div>
 
     <div id="search-overlay" class="search-overlay hidden">
         <div class="search-box-container">
@@ -27,7 +37,6 @@
             </button>
             <button onclick="toggleSearch()" class="close-search">✕</button>
         </div>
-        <div id="search-results-preview"></div>
     </div>
 
     <main id="app" class="app-content">
@@ -41,13 +50,29 @@
                 <div class="section-title">
                     <div class="bar-accent pink"></div>
                     <h3>Lanjutkan Menonton</h3>
-                    <a href="#" onclick="showHistoryPage()" class="see-all">Lihat Semua</a>
                 </div>
-                <div id="history-list" class="horizontal-scroll large-cards">
-                    </div>
+                <div id="history-list" class="horizontal-scroll large-cards"></div>
             </div>
 
             <div id="home-content"></div>
+        </div>
+
+        <div id="list-view" class="hidden">
+             <div class="section-title">
+                <div class="bar-accent blue"></div>
+                <h3>Jelajahi Genre</h3>
+            </div>
+            <div class="genre-grid">
+                <button onclick="handleSearch('Isekai', true)">🌀 Isekai</button>
+                <button onclick="handleSearch('Action', true)">⚔️ Action</button>
+                <button onclick="handleSearch('Romance', true)">❤️ Romance</button>
+                <button onclick="handleSearch('Fantasy', true)">✨ Fantasy</button>
+                <button onclick="handleSearch('Drama', true)">🎭 Drama</button>
+                <button onclick="handleSearch('Comedy', true)">😂 Comedy</button>
+                <button onclick="handleSearch('Slice of Life', true)">🍃 Slice of Life</button>
+                <button onclick="handleSearch('Horror', true)">👻 Horror</button>
+            </div>
+            <div id="list-results"></div>
         </div>
 
         <div id="detail-view" class="hidden">
@@ -60,8 +85,7 @@
             <div id="anime-info"></div>
             
             <div class="section-divider">
-                <h3>Episode</h3>
-                <span class="badge-soft">List</span>
+                <h3>Daftar Episode</h3>
             </div>
             <div class="episode-grid" id="episode-grid"></div>
         </div>
@@ -80,44 +104,34 @@
 
             <div class="watch-info">
                 <h2 id="video-title">Loading...</h2>
-                <div class="server-label">Pilih Server:</div>
-                <div class="server-list" id="server-options"></div>
+                <div class="server-area">
+                    <div class="server-label">Pilih Server:</div>
+                    <div class="server-list" id="server-options"></div>
+                </div>
             </div>
-        </div>
 
-        <div id="list-view" class="hidden">
-             <div class="section-title">
-                <div class="bar-accent blue"></div>
-                <h3>Daftar Genre</h3>
-            </div>
-            <div class="genre-grid">
-                <button onclick="handleSearch('Isekai')">🌀 Isekai</button>
-                <button onclick="handleSearch('Action')">⚔️ Action</button>
-                <button onclick="handleSearch('Romance')">❤️ Romance</button>
-                <button onclick="handleSearch('Fantasy')">✨ Fantasy</button>
-                <button onclick="handleSearch('Drama')">🎭 Drama</button>
-                <button onclick="handleSearch('Comedy')">😂 Comedy</button>
-                <button onclick="handleSearch('Slice of Life')">🍃 Slice of Life</button>
-                <button onclick="handleSearch('Horror')">👻 Horror</button>
+            <div class="watch-playlist">
+                <div class="section-divider">
+                    <h3>Ganti Episode</h3>
+                    <span class="badge-soft" id="current-ep-badge">Ep ?</span>
+                </div>
+                <div class="episode-list-horizontal" id="watch-episode-list">
+                    </div>
             </div>
         </div>
 
         <div id="profile-view" class="hidden">
             <div class="profile-card">
-                <img src="https://ui-avatars.com/api/?name=R_hmt&background=0D8ABC&color=fff&rounded=true" class="big-avatar">
+                <img src="https://a.top4top.io/p_36880pr920.jpeg" class="big-avatar">
                 <h2>R_hmt ofc</h2>
-                <p>Developer & Admin</p>
-                <div class="profile-stats">
-                    <div class="stat"><span>User</span><strong>Guest</strong></div>
-                    <div class="stat"><span>Status</span><strong>Active</strong></div>
-                </div>
+                <p>Admin & Developer</p>
                 <div class="profile-actions">
                      <a href="https://whatsapp.com/channel/0029Vb6ukqnHQbS4mKP0j80L" target="_blank" class="wa-btn">
                         Join WhatsApp Channel
                     </a>
                 </div>
                 <div class="info-text">
-                    <p>Web ini dibuat menggunakan referensi style OrbitCloud. Semua konten didapatkan dari sumber pihak ketiga.</p>
+                    <p>NimeStream 2026. UI Design inspired by OrbitCloud.</p>
                 </div>
             </div>
         </div>
@@ -140,11 +154,7 @@
             </button>
         </div>
 
-        <div class="nav-item" onclick="showHistoryPage()" id="nav-history">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            <span>History</span>
-        </div>
-        <div class="nav-item" onclick="showProfile()" id="nav-profile">
+        <div class="nav-item" onclick="goProfile()" id="nav-profile">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             <span>Profile</span>
         </div>
