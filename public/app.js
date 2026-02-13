@@ -1,69 +1,122 @@
 const API_BASE = '/api'; 
 
-// --- KONFIGURASI GENRE BERANDA (SMART KEYWORDS) ---
-// Kita menggunakan array 'queries' untuk menggabungkan banyak hasil pencarian
-// agar list menjadi penuh dan tidak hanya berisi 1 item.
 const HOME_SECTIONS = [
     { 
-        title: "Sedang Hangat 🔥", 
-        mode: "latest" // Mode khusus untuk mengambil update terbaru
+        title: "Lanjutkan Menonton", 
+        mode: "latest",
+        badge: null,
+        className: "continue-watch"
     },
     { 
-        title: "Isekai & Fantasy 🌀", 
-        queries: ["isekai", "reincarnation", "world", "maou"] 
+        title: "LayarOtaku Update", 
+        queries: ["isekai", "world"],
+        badge: "Ongoing",
+        badgeClass: "ongoing"
+    },
+    { 
+        title: "Nimegami Update", 
+        queries: ["magic", "adventure"],
+        badge: "Anime & Movie",
+        badgeClass: "movie"
+    },
+    { 
+        title: "Donghua Terbaru", 
+        queries: ["donghua", "martial arts"],
+        badge: "Anichin",
+        badgeClass: "anichin"
     },
     { 
         title: "Action Hits ⚔️", 
-        queries: ["kimetsu", "jujutsu", "piece", "bleach", "hunter", "shingeki"] 
-    },
-    { 
-        title: "Romance & Drama ❤️", 
-        queries: ["love", "kanojo", "romance", "heroine", "uso"] 
-    },
-    { 
-        title: "School Life 🏫", 
-        queries: ["school", "gakuen", "classroom", "seishun"] 
-    },
+        queries: ["jujutsu", "piece", "hunter"] 
+    }
 ];
 
-// --- UTILITAS UI ---
+// UI Control
 const show = (id) => document.getElementById(id).classList.remove('hidden');
 const hide = (id) => document.getElementById(id).classList.add('hidden');
+const loader = (state) => state ? show('loading') : hide('loading');
 
-function loader(showLoader = true) {
-    const loading = document.getElementById('loading');
-    if (showLoader) loading.classList.remove('hidden');
-    else loading.classList.add('hidden');
+function toggleSearch() {
+    const overlay = document.getElementById('search-overlay');
+    overlay.classList.toggle('hidden');
+    if(!overlay.classList.contains('hidden')) {
+        document.getElementById('searchInput').focus();
+    }
 }
 
-// --- RENDER SECTION BERANDA (Horizontal Scroll) ---
-function renderHomeSection(container, title, data) {
-    if (!data || data.length === 0) return;
+// Load Home
+async function loadLatest() {
+    loader(true);
+    hide('detail-view');
+    hide('watch-view');
+    show('home-view');
+    
+    const homeContainer = document.getElementById('home-view');
+    homeContainer.innerHTML = '';
 
-    const sectionDiv = document.createElement('section');
-    sectionDiv.className = 'category-section';
+    try {
+        for (const section of HOME_SECTIONS) {
+            let data = [];
+            if (section.mode === 'latest') {
+                const res = await fetch(`${API_BASE}/latest`);
+                data = await res.json();
+                // Limit for "Continue Watch"
+                data = data.slice(0, 5);
+            } else {
+                const promises = section.queries.map(q => 
+                    fetch(`${API_BASE}/search?q=${encodeURIComponent(q)}`).then(r => r.json()).catch(() => [])
+                );
+                const results = await Promise.all(promises);
+                results.forEach(list => { if(Array.isArray(list)) data = [...data, ...list]; });
+                data = removeDuplicates(data, 'url').slice(0, 12);
+            }
 
+            if (data.length > 0) {
+                renderSection(section, data, homeContainer);
+            }
+        }
+    } catch (err) {
+        console.error("Engine Error:", err);
+    } finally {
+        loader(false);
+    }
+}
+
+function removeDuplicates(array, key) {
+    return [ ...new Map(array.map(item => [item[key], item])).values() ];
+}
+
+function renderSection(config, data, container) {
+    const sectionDiv = document.createElement('div');
+    sectionDiv.className = `category-section ${config.className || ''}`;
+
+    const badgeHtml = config.badge ? `<span class="status-badge ${config.badgeClass}">${config.badge}</span>` : '';
+    
     const headerHtml = `
-        <div class="header-flex">
-            <div class="section-header">
-                <div class="bar-accent"></div>
-                <h3>${title}</h3>
+        <div class="section-header-flex">
+            <div class="section-title-wrap">
+                <div class="accent-line"></div>
+                <h2>${config.title}</h2>
+                ${badgeHtml}
             </div>
+            <div class="btn-more" onclick="handleSearch('${config.title.split(' ')[0]}')">Lihat Semua</div>
         </div>
     `;
 
     const cardsHtml = data.map(anime => {
-        // Normalisasi data
-        const eps = anime.episode || anime.score || '?'; 
-        const displayTitle = anime.title.length > 35 ? anime.title.substring(0, 35) + '...' : anime.title;
+        const eps = anime.episode || anime.score || '??';
+        const isBig = config.className === 'continue-watch';
         
         return `
         <div class="scroll-card" onclick="loadDetail('${anime.url}')">
-            <div class="scroll-card-img">
+            <div class="card-thumb">
                 <img src="${anime.image}" alt="${anime.title}" loading="lazy">
-                <div class="ep-badge">Ep ${eps}</div>
+                <div class="badge-ep">${isBig ? 'Ep ' + eps : 'ON ' + eps}</div>
+                <div class="play-overlay">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                </div>
             </div>
-            <div class="scroll-card-title">${displayTitle}</div>
+            <div class="card-title">${anime.title}</div>
         </div>
         `;
     }).join('');
@@ -72,89 +125,47 @@ function renderHomeSection(container, title, data) {
     container.appendChild(sectionDiv);
 }
 
-// --- PENCARIAN (Grid View) ---
+// Search Logic
 async function handleSearch(manualQuery = null) {
     const searchInput = document.getElementById('searchInput');
-    const query = manualQuery || searchInput.value.trim();
+    const query = manualQuery || searchInput.value;
     if (!query) return;
 
+    hide('search-overlay');
     loader(true);
+    
     try {
         const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
         const data = await res.json();
-
+        
         hide('detail-view');
         hide('watch-view');
         show('home-view');
 
-        const homeView = document.getElementById('home-view');
-        homeView.innerHTML = `
-            <section class="category-section">
-                <div class="header-flex">
-                    <div class="section-header">
-                        <div class="bar-accent"></div>
-                        <h3>Hasil Pencarian: "${query}"</h3>
+        const homeContainer = document.getElementById('home-view');
+        homeContainer.innerHTML = `
+            <div class="category-section" style="padding-top:20px">
+                <div class="section-header-flex">
+                    <div class="section-title-wrap">
+                        <div class="accent-line"></div>
+                        <h2>Hasil: "${query}"</h2>
                     </div>
                 </div>
-                <div class="anime-grid">
+                <div class="horizontal-scroll" style="flex-wrap: wrap; overflow: visible;">
                     ${data.map(anime => `
-                        <div class="qa-btn" onclick="loadDetail('${anime.url}')">
-                            <img src="${anime.image}" alt="${anime.title}" loading="lazy">
-                            <div class="qa-title">${anime.title}</div>
-                            <div class="qa-meta">${anime.episode || anime.score || ''}</div>
+                        <div class="scroll-card" onclick="loadDetail('${anime.url}')" style="margin-bottom:20px">
+                            <div class="card-thumb"><img src="${anime.image}"></div>
+                            <div class="card-title">${anime.title}</div>
                         </div>
                     `).join('')}
                 </div>
-            </section>
+            </div>
         `;
-    } catch (err) {
-        console.error(err);
-    } finally {
-        loader(false);
-    }
+    } catch (e) { console.error(e); }
+    finally { loader(false); }
 }
 
-// --- LOAD BERANDA (SEMUA SECTION) ---
-async function loadLatest() {
-    loader(true);
-    const homeView = document.getElementById('home-view');
-    homeView.innerHTML = '';
-
-    try {
-        for (const section of HOME_SECTIONS) {
-            let sectionData = [];
-
-            if (section.mode === 'latest') {
-                const res = await fetch(`${API_BASE}/latest`);
-                sectionData = await res.json();
-            } else if (section.queries && section.queries.length > 0) {
-                // Gabungkan hasil dari beberapa query
-                let combined = [];
-                for (const q of section.queries) {
-                    const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(q)}`);
-                    const data = await res.json();
-                    combined = combined.concat(data);
-                }
-
-                // Remove duplikat berdasarkan url
-                const uniqueMap = new Map();
-                combined.forEach(item => {
-                    if (item && item.url) uniqueMap.set(item.url, item);
-                });
-
-                sectionData = Array.from(uniqueMap.values()).slice(0, 15);
-            }
-
-            renderHomeSection(homeView, section.title, sectionData);
-        }
-    } catch (err) {
-        console.error(err);
-    } finally {
-        loader(false);
-    }
-}
-
-// --- DETAIL ANIME ---
+// Detail & Watch (Sesuai Struktur Backend Anda)
 async function loadDetail(url) {
     loader(true);
     try {
@@ -164,37 +175,28 @@ async function loadDetail(url) {
         hide('home-view');
         hide('watch-view');
         show('detail-view');
+        window.scrollTo(0,0);
 
         document.getElementById('anime-info').innerHTML = `
-            <div class="detail-header">
-                <img src="${data.image}" class="detail-poster">
-                <div class="detail-text">
-                    <h1>${data.title}</h1>
-                    <div class="detail-meta">
-                        <span>${data.info.genre || 'Anime'}</span> • <span>${data.info.status || 'Ongoing'}</span>
-                    </div>
-                    <p class="desc">${data.description || 'Tidak ada deskripsi.'}</p>
+            <div class="detail-header" style="display:flex; gap:20px; padding:20px; flex-wrap:wrap;">
+                <img src="${data.image}" style="width:150px; border-radius:12px; box-shadow:0 10px 20px rgba(0,0,0,0.5)">
+                <div style="flex:1; min-width:200px;">
+                    <h1 style="font-size:1.5rem; margin-bottom:10px;">${data.title}</h1>
+                    <p style="color:var(--text-dim); font-size:0.9rem; line-height:1.6;">${data.description}</p>
                 </div>
             </div>
         `;
 
         const epGrid = document.getElementById('episode-grid');
         epGrid.innerHTML = data.episodes.map(ep => {
-            let epNum = ep.title.match(/Episode\s+(\d+)/i);
-            let displayTitle = epNum ? epNum[1] : ep.title.replace('Episode', '').trim();
-            if(displayTitle.length > 5) displayTitle = 'Ep'; 
-
-            return `<div class="ep-box" onclick="loadVideo('${ep.url}')">${displayTitle}</div>`;
+            let epNum = ep.title.match(/\d+/);
+            return `<div class="ep-box" onclick="loadVideo('${ep.url}')">${epNum ? epNum[0] : 'Ep'}</div>`;
         }).join('');
 
-    } catch (err) {
-        console.error(err);
-    } finally {
-        loader(false);
-    }
+    } catch (err) { console.error(err); } 
+    finally { loader(false); }
 }
 
-// --- NONTON VIDEO ---
 async function loadVideo(url) {
     loader(true);
     try {
@@ -203,39 +205,25 @@ async function loadVideo(url) {
 
         hide('detail-view');
         show('watch-view');
+        window.scrollTo(0,0);
 
         document.getElementById('video-title').innerText = data.title;
-        
         const player = document.getElementById('video-player');
         const serverContainer = document.getElementById('server-options');
 
         if (data.streams.length > 0) {
             player.src = data.streams[0].url;
-            
-            serverContainer.innerHTML = data.streams.map((stream, index) => `
-                <button class="server-tag ${index === 0 ? 'active' : ''}" 
-                    onclick="changeServer('${stream.url}', this)">
-                     ${stream.server}
+            serverContainer.innerHTML = data.streams.map((s, i) => `
+                <button class="server-tag ep-box ${i === 0 ? 'active' : ''}" 
+                        onclick="document.getElementById('video-player').src='${s.url}'">
+                    ${s.server}
                 </button>
             `).join('');
-        } else {
-            alert('Maaf, stream belum tersedia untuk episode ini.');
         }
-
-    } catch (err) {
-        console.error(err);
-    } finally {
-        loader(false);
-    }
+    } catch (err) { console.error(err); }
+    finally { loader(false); }
 }
 
-function changeServer(url, btn) {
-    document.getElementById('video-player').src = url;
-    document.querySelectorAll('.server-tag').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-}
-
-// Navigasi
 function goHome() { loadLatest(); }
 function backToDetail() {
     hide('watch-view');
@@ -243,16 +231,5 @@ function backToDetail() {
     document.getElementById('video-player').src = ''; 
 }
 
-// Sidebar
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
-}
-
 // Init
 document.addEventListener('DOMContentLoaded', loadLatest);
-document.getElementById('searchInput').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleSearch();
-});

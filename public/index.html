@@ -1,191 +1,111 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NimeStream - Anime Streaming</title>
-
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrbitCloud • Realtime Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- HEADER -->
-  <header class="top-header">
-    <div class="brand">
-      <div class="brand-logo">
-        <span class="logo-circle"></span>
-      </div>
-      <div class="brand-text">
-        <h1 class="brand-title">NimeStream</h1>
-        <p class="brand-sub">Realtime Engine</p>
-      </div>
-    </div>
-
-    <button class="profile-btn" id="openSidebarBtn">
-      <img src="https://i.imgur.com/1XqYQ7Y.png" alt="profile" />
-    </button>
-  </header>
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <h2>Menu</h2>
-      <button class="close-btn" id="closeSidebarBtn">✕</button>
-    </div>
-
-    <div class="sidebar-content">
-      <a href="#" class="sidebar-link active" data-page="home">Home</a>
-      <a href="#" class="sidebar-link" data-page="list">List Anime</a>
-      <a href="#" class="sidebar-link" data-page="history">History</a>
-      <a href="#" class="sidebar-link" data-page="profile">Profile</a>
-    </div>
-
-    <div class="sidebar-footer">
-      <p>Developer: <span id="developerName">NimeStream Team</span></p>
-    </div>
-  </aside>
-
-  <!-- OVERLAY -->
-  <div class="overlay" id="overlay"></div>
-
-  <!-- MAIN CONTENT -->
-  <main class="container">
-
-    <!-- HOME PAGE -->
-    <section id="homePage" class="page active">
-
-      <!-- Continue Watching -->
-      <div class="section-header">
-        <div class="section-title">
-          <span class="section-line pink"></span>
-          <h2>Lanjutkan Menonton</h2>
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="brand-wrapper">
+                <div class="orbit-logo">
+                    <svg viewBox="0 0 100 100" width="32" height="32">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="2" opacity="0.2"/>
+                        <path d="M20 50 Q50 10 80 50 Q50 90 20 50" fill="#29b6f6" />
+                        <circle cx="50" cy="50" r="10" fill="white" />
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <div class="logo-main">OrbitCloud</div>
+                    <div class="logo-sub">REALTIME ENGINE</div>
+                </div>
+            </div>
         </div>
-        <button class="see-all-btn" id="seeAllContinueBtn">Lihat Semua</button>
-      </div>
 
-      <div class="grid-two" id="continueWatching">
-        <!-- Render by JS -->
-      </div>
-
-      <!-- Update Section -->
-      <div class="section-header">
-        <div class="section-title">
-          <span class="section-line orange"></span>
-          <h2>LayarOtaku Update</h2>
+        <div class="nav-right">
+            <div class="user-avatar">
+                <img src="https://i.pravatar.cc/100?img=12" alt="Profile">
+            </div>
         </div>
-        <span class="badge">Ongoing</span>
-      </div>
+    </nav>
 
-      <div class="scroll-row" id="latestUpdate">
-        <!-- Render by JS -->
-      </div>
-
-      <!-- Movie Update -->
-      <div class="section-header">
-        <div class="section-title">
-          <span class="section-line green"></span>
-          <h2>Nimegami Update</h2>
+    <main id="app" class="app-shell">
+        <div id="loading" class="hidden">
+            <div class="orbit-spinner"></div>
+            <p>Initializing Engine...</p>
         </div>
-        <span class="badge teal">Anime & Movie</span>
-      </div>
 
-      <div class="scroll-row" id="movieUpdate">
-        <!-- Render by JS -->
-      </div>
+        <div id="home-view"></div>
 
-      <!-- Donghua -->
-      <div class="section-header">
-        <div class="section-title">
-          <span class="section-line purple"></span>
-          <h2>Donghua Terbaru</h2>
+        <div id="detail-view" class="hidden">
+            <div class="nav-back">
+                <button onclick="goHome()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    Kembali
+                </button>
+            </div>
+            <div id="anime-info"></div>
+            <div class="section-header-wrap">
+                <div class="accent-bar"></div>
+                <h3>Daftar Episode</h3>
+            </div>
+            <div class="episode-grid" id="episode-grid"></div>
         </div>
-        <span class="badge purple">Anichin</span>
-      </div>
 
-      <div class="scroll-row" id="donghuaUpdate">
-        <!-- Render by JS -->
-      </div>
+        <div id="watch-view" class="hidden">
+            <div class="nav-back">
+                <button onclick="backToDetail()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    List Episode
+                </button>
+            </div>
+            <div class="video-container">
+                <iframe id="video-player" src="" allowfullscreen></iframe>
+            </div>
+            <h2 id="video-title" class="video-main-title"></h2>
+            <div class="server-label">Select Server:</div>
+            <div class="server-list" id="server-options"></div>
+        </div>
+    </main>
 
-    </section>
-
-    <!-- LIST PAGE -->
-    <section id="listPage" class="page">
-      <div class="page-title">
-        <h2>Daftar Anime</h2>
-      </div>
-      <div class="anime-grid" id="animeList">
-        <!-- Render by JS -->
-      </div>
-    </section>
-
-    <!-- HISTORY PAGE -->
-    <section id="historyPage" class="page">
-      <div class="page-title">
-        <h2>History</h2>
-      </div>
-      <div class="anime-grid" id="historyList">
-        <!-- Render by JS -->
-      </div>
-    </section>
-
-    <!-- PROFILE PAGE -->
-    <section id="profilePage" class="page">
-      <div class="page-title">
-        <h2>Profile</h2>
-      </div>
-
-      <div class="profile-card">
-        <h3>NimeStream</h3>
-        <p>Anime Streaming Web</p>
-        <p class="small">UI Updated: OrbitCloud Style</p>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- SEARCH MODAL -->
-  <div class="search-modal" id="searchModal">
-    <div class="search-box">
-      <div class="search-header">
-        <h3>Search Anime</h3>
-        <button id="closeSearchBtn">✕</button>
-      </div>
-
-      <input type="text" id="searchInput" placeholder="Cari anime..." />
-
-      <div class="search-results" id="searchResults">
-        <!-- Render by JS -->
-      </div>
+    <div id="search-overlay" class="search-modal hidden">
+        <div class="search-modal-content">
+            <input type="text" id="searchInput" placeholder="Cari anime favoritmu...">
+            <button onclick="handleSearch()" class="search-action-btn">Cari</button>
+            <button onclick="toggleSearch()" class="close-search">Batal</button>
+        </div>
     </div>
-  </div>
 
-  <!-- BOTTOM NAV -->
-  <nav class="bottom-nav">
-    <button class="nav-btn active" data-page="home">
-      <span class="icon">🏠</span>
-      <span class="label">Home</span>
-    </button>
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="goHome()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Home</span>
+        </button>
+        <button class="nav-item" onclick="handleSearch('ongoing')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            <span>List</span>
+        </button>
+        
+        <div class="search-fab-container">
+            <button class="search-fab" onclick="toggleSearch()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+        </div>
 
-    <button class="nav-btn" data-page="list">
-      <span class="icon">📄</span>
-      <span class="label">List</span>
-    </button>
+        <button class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>History</span>
+        </button>
+        <button class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>Profile</span>
+        </button>
+    </div>
 
-    <button class="nav-btn search-btn" id="openSearchBtn">
-      <span class="icon">🔍</span>
-    </button>
-
-    <button class="nav-btn" data-page="history">
-      <span class="icon">🕒</span>
-      <span class="label">History</span>
-    </button>
-
-    <button class="nav-btn" data-page="profile">
-      <span class="icon">👤</span>
-      <span class="label">Profile</span>
-    </button>
-  </nav>
-
-  <script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
